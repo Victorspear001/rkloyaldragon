@@ -160,7 +160,6 @@ function searchCustomers() {
     renderList(filtered);
 }
 
-// Helper to draw the 6 circles
 function getOrbHTML(count) {
     let html = '<div class="stamp-container">';
     for (let i = 0; i < 6; i++) {
@@ -183,7 +182,7 @@ function renderList(data) {
     data.forEach(c => {
         let actionBtn = "";
         
-        // If they already have 6, show redeem button
+        // If already 6, show redeem button
         if (c.stamps >= 6) {
             actionBtn = `<button style="background:gold; color:black;" onclick="openRewardModal('${c.customer_id}', '${c.name}')">🎁 Redeem Prize</button>`;
         } else {
@@ -217,9 +216,9 @@ async function addStamp(id) {
     if (!cust) return;
 
     cust.stamps += 1;
-    searchCustomers(); // Update Orbs immediately on screen
+    searchCustomers(); // Update screen instantly
 
-    // If they just hit 6, wait 500ms then show the Congratulations
+    // If they hit 6, wait 500ms then show the Congratulations
     if (cust.stamps === 6) {
         setTimeout(() => {
             openRewardModal(cust.customer_id, cust.name);
@@ -248,14 +247,12 @@ function closeModal() {
 async function redeemReward() {
     if (!activeRewardId) return;
 
-    // Reset local data
     const cust = currentCustomers.find(c => c.customer_id === activeRewardId);
     if (cust) cust.stamps = 0;
     
     closeModal();
-    searchCustomers(); // Refresh UI to show empty Orbs
+    searchCustomers();
 
-    // Update Database
     await fetch(`${API_URL}/customer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
