@@ -82,6 +82,10 @@
                     <input type="file" id="csv-input" accept=".csv" class="hidden" onchange="importCSV()">
                 </div>
 
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="🔍 Search by Name or Mobile..." onkeyup="searchCustomers()">
+                </div>
+
                 <div id="customer-list">Loading...</div>
             </section>
         </div>
