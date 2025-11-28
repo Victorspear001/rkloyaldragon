@@ -74,6 +74,7 @@ function generateIDCard(name, id) {
     const ctx = canvas.getContext('2d');
     document.getElementById('id-card-area').classList.remove('hidden');
 
+    // Drawing the card at high resolution
     const grd = ctx.createLinearGradient(0, 0, 450, 270);
     grd.addColorStop(0, "#8a0303"); 
     grd.addColorStop(0.5, "#000000"); 
@@ -182,7 +183,6 @@ function renderList(data) {
     data.forEach(c => {
         let actionBtn = "";
         
-        // If already 6, show redeem button
         if (c.stamps >= 6) {
             actionBtn = `<button style="background:gold; color:black;" onclick="openRewardModal('${c.customer_id}', '${c.name}')">🎁 Redeem Prize</button>`;
         } else {
@@ -192,19 +192,21 @@ function renderList(data) {
         const div = document.createElement('div');
         div.className = 'cust-item';
         div.innerHTML = `
-            <div style="display:flex; justify-content:space-between;">
-                <strong>${c.name}</strong> 
-                <span style="color:gold;">${c.customer_id}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong style="font-size:1.1em;">${c.name}</strong><br>
+                    <span style="color:gold; font-size:0.9em;">${c.customer_id}</span>
+                </div>
+                <div style="font-size:0.9em; color:#ccc;">${c.mobile}</div>
             </div>
-            <div>Mobile: ${c.mobile}</div>
             
             ${getOrbHTML(c.stamps)}
             
             <div style="margin-top:5px;">${actionBtn}</div>
 
-            <div style="margin-top:10px; border-top:1px solid #333; padding-top:5px;">
+            <div style="margin-top:10px; border-top:1px solid #333; padding-top:10px; display:flex; gap:10px;">
                  <button class="danger-btn" onclick="deleteCustomer('${c.customer_id}')">Delete</button>
-                 <button class="secondary" style="font-size:0.8em" onclick="generateIDCard('${c.name}', '${c.customer_id}')">View ID Card</button>
+                 <button class="secondary small-btn" onclick="generateIDCard('${c.name}', '${c.customer_id}')">View ID</button>
             </div>
         `;
         list.appendChild(div);
@@ -216,16 +218,14 @@ async function addStamp(id) {
     if (!cust) return;
 
     cust.stamps += 1;
-    searchCustomers(); // Update screen instantly
+    searchCustomers(); 
 
-    // If they hit 6, wait 500ms then show the Congratulations
     if (cust.stamps === 6) {
         setTimeout(() => {
             openRewardModal(cust.customer_id, cust.name);
         }, 500); 
     }
 
-    // Save to database
     await fetch(`${API_URL}/customer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -251,7 +251,7 @@ async function redeemReward() {
     if (cust) cust.stamps = 0;
     
     closeModal();
-    searchCustomers();
+    searchCustomers(); 
 
     await fetch(`${API_URL}/customer`, {
         method: 'POST',
@@ -260,16 +260,27 @@ async function redeemReward() {
     });
 }
 
+// --- SECURE DELETE ---
 async function deleteCustomer(id) {
-    if(!confirm("Are you sure you want to banish this customer?")) return;
+    if(!confirm("Are you sure you want to PERMANENTLY delete this customer?")) return;
+
+    const password = prompt("⚠ SECURITY CHECK ⚠\nEnter Admin Password to delete:");
+    if (!password) return;
+
     const res = await fetch(`${API_URL}/customer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', id })
+        body: JSON.stringify({ action: 'delete', id, password: password })
     });
+    
+    const data = await res.json();
+
     if(res.ok) {
+        alert(data.message);
         currentCustomers = currentCustomers.filter(c => c.customer_id !== id);
         searchCustomers();
+    } else {
+        alert("❌ FAILED: " + data.error);
     }
 }
 
