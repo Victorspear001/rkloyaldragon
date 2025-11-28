@@ -1,0 +1,21 @@
+{
+  "name": "RK Dragon Panipuri",
+  "short_name": "DragonLoyalty",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#8a0303",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/182/182321.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/182/182321.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
