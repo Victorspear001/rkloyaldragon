@@ -2,29 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Viewport for Mobile Scaling -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA Settings -->
+    <meta name="theme-color" content="#8a0303">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    
     <title>RK Dragon Panipuri</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <header>
-            <h1>🐉 RK DRAGON PANIPURI 🐉</h1>
+            <h1>🐉 RK DRAGON 🐉</h1>
             <p style="color: gold; font-style: italic;">Where Flavor Meets Fire</p>
         </header>
 
+        <!-- Login Section -->
         <section id="login-section">
             <h2>Gate of the Dragon</h2>
             <input type="text" id="login-user" placeholder="Username">
             <input type="password" id="login-pass" placeholder="Password">
             <button onclick="login()">Enter the Lair</button>
-            <div style="margin-top: 10px;">
+            <div style="margin-top: 15px;">
                 <span onclick="showRegister()" style="color:orange; cursor:pointer;">Register Admin</span> | 
                 <span onclick="showRecovery()" style="color:orange; cursor:pointer;">Forgot Password?</span>
             </div>
         </section>
 
+        <!-- Register Admin -->
         <section id="register-section" class="hidden">
             <h2>New Warlord</h2>
             <input type="text" id="reg-user" placeholder="Username">
@@ -39,6 +49,7 @@
             <button class="secondary" onclick="showLogin()">Back</button>
         </section>
 
+        <!-- Recovery -->
         <section id="recovery-section" class="hidden">
             <h2>Recover Power</h2>
             <input type="text" id="rec-user" placeholder="Username">
@@ -53,37 +64,44 @@
             <button class="secondary" onclick="showLogin()">Back</button>
         </section>
 
+        <!-- Dashboard -->
         <div id="dashboard" class="hidden">
             <div class="toolbar">
-                <button onclick="showTab('add-cust')">Add Customer</button>
-                <button onclick="showTab('list-cust')">Customer List</button>
+                <button onclick="showTab('add-cust')">Add New</button>
+                <button onclick="showTab('list-cust')">List</button>
                 <button onclick="location.reload()" class="secondary">Logout</button>
             </div>
 
+            <!-- Add Customer Tab -->
             <section id="add-cust-section">
                 <h3>Summon Customer</h3>
                 <input type="text" id="cust-name" placeholder="Customer Name">
                 <input type="number" id="cust-mobile" placeholder="Mobile Number">
-                <button onclick="registerCustomer()">Generate ID Card</button>
+                <button onclick="registerCustomer()" class="large-btn">Generate ID Card</button>
                 
                 <div id="id-card-area" class="hidden">
-                    <canvas id="cardCanvas" width="450" height="270" style="border-radius: 15px; box-shadow: 0 0 15px gold;"></canvas>
+                    <div class="canvas-wrapper">
+                        <canvas id="cardCanvas" width="450" height="270"></canvas>
+                    </div>
                     <br>
                     <button onclick="downloadID()">Download ID Card</button>
                 </div>
             </section>
 
+            <!-- Customer List Tab -->
             <section id="list-cust-section" class="hidden">
                 <h3>Loyalty Realm</h3>
                 
-                <div style="margin-bottom: 20px; border: 1px dashed orange; padding: 10px;">
-                    <button onclick="exportCSV()" style="font-size: 0.8em;">⬇ Export CSV</button>
-                    <button onclick="document.getElementById('csv-input').click()" style="font-size: 0.8em;">⬆ Import CSV</button>
+                <!-- Import/Export Tools -->
+                <div class="tools-panel">
+                    <button onclick="exportCSV()" class="small-btn">⬇ Export</button>
+                    <button onclick="document.getElementById('csv-input').click()" class="small-btn">⬆ Import</button>
                     <input type="file" id="csv-input" accept=".csv" class="hidden" onchange="importCSV()">
                 </div>
 
+                <!-- Search Bar -->
                 <div class="search-container">
-                    <input type="text" id="search-input" placeholder="🔍 Search by Name or Mobile..." onkeyup="searchCustomers()">
+                    <input type="text" id="search-input" placeholder="🔍 Name or Mobile..." onkeyup="searchCustomers()">
                 </div>
 
                 <div id="customer-list">Loading...</div>
@@ -91,22 +109,23 @@
         </div>
     </div>
 
+    <!-- CONGRATULATIONS MODAL -->
     <div id="reward-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 class="glow-text">🔥 LEGENDARY STATUS 🔥</h2>
+            <h2 class="glow-text">🔥 LEGENDARY 🔥</h2>
             <p>The Dragon is Pleased!</p>
             
             <div class="reward-icon">🐲 🎁</div>
             
-            <p style="font-size: 1.2em; margin: 20px 0;">
+            <p style="font-size: 1.1em; margin: 15px 0;">
                 <span id="reward-cust-name" style="color: gold; font-weight:bold;"></span> 
-                has collected 6 Dragon Orbs.
+                has collected 6 Orbs.
             </p>
             
             <h3 style="color: #00ff00;">GET 1 FREE SNACK!</h3>
             
-            <button onclick="redeemReward()">Give Snack & Reset</button>
-            <button class="secondary" onclick="closeModal()">Close (Don't Reset)</button>
+            <button onclick="redeemReward()" class="large-btn">Give Snack & Reset</button>
+            <button class="secondary" onclick="closeModal()">Close</button>
         </div>
     </div>
 
