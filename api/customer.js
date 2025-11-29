@@ -34,15 +34,18 @@ module.exports = async function (req, res) {
       return res.status(200).json({ message: 'Updated' });
     }
 
-    // --- SECURE DELETE CHECK ---
+    // NEW: Remove Stamp Logic
+    if (action === 'unstamp') {
+        // Decrease by 1 but ensure it doesn't go below 0
+        await pool.query('UPDATE customers SET stamps = GREATEST(0, stamps - 1) WHERE customer_id = $1', [id]);
+        return res.status(200).json({ message: 'Stamp Removed' });
+    }
+
     if (action === 'delete') {
-        // Verify password against Admin table
         const authCheck = await pool.query('SELECT * FROM admins WHERE password = $1', [password]);
-        
         if (authCheck.rows.length === 0) {
             return res.status(401).json({ error: 'WRONG PASSWORD! Deletion Denied.' });
         }
-
         await pool.query('DELETE FROM customers WHERE customer_id = $1', [id]);
         return res.status(200).json({ message: 'Deleted Successfully' });
     }
