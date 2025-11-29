@@ -40,6 +40,7 @@ module.exports = async function (req, res) {
     }
 
     if (action === 'delete') {
+      // Password check removed because we now use Supabase Email Login on Frontend
       await pool.query('DELETE FROM customers WHERE customer_id = $1', [id]);
       return res.status(200).json({ message: 'Deleted' });
     }
