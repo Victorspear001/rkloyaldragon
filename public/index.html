@@ -3,125 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#8a0303">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    
     <title>RK Dragon Panipuri</title>
+    <meta name="theme-color" content="#8a0303">
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
+
+    <div id="landing-page" class="container">
         <header>
             <h1>🐉 RK DRAGON 🐉</h1>
-            <p style="color: gold; font-style: italic;">Where Flavor Meets Fire</p>
+            <p>Choose Your Destiny</p>
         </header>
+        <div class="split-menu">
+            <button onclick="goToCustomerLogin()" class="large-btn pulse-btn">I am a Customer</button>
+            <button onclick="goToAdminLogin()" class="secondary">I am the Admin</button>
+        </div>
+    </div>
 
-        <!-- Login Section -->
-        <section id="login-section">
-            <h2>Gate of the Dragon</h2>
-            <input type="text" id="login-user" placeholder="Username">
-            <input type="password" id="login-pass" placeholder="Password">
-            <button onclick="login()">Enter the Lair</button>
-            <div style="margin-top: 15px;">
-                <span onclick="showRegister()" style="color:orange; cursor:pointer;">Register Admin</span> | 
-                <span onclick="showRecovery()" style="color:orange; cursor:pointer;">Forgot Password?</span>
+    <div id="customer-portal" class="container hidden">
+        <button onclick="goHome()" class="back-corner">🏠</button>
+        
+        <section id="cust-login-sec">
+            <h2>Customer Guild</h2>
+            <p>Enter your ID to check your stats</p>
+            <input type="text" id="cust-login-id" placeholder="Enter ID (e.g. RK1234)">
+            <button onclick="customerLogin()" class="large-btn">Open Grimoire</button>
+        </section>
+
+        <section id="cust-dashboard" class="hidden">
+            <h2 id="display-cust-name">Warrior</h2>
+            
+            <div class="rpg-card">
+                <div class="level-header">
+                    <span id="rpg-rank">Bronze</span>
+                    <span style="font-size:0.8em; color:#888;">Lvl: <span id="lifetime-count">0</span></span>
+                </div>
+                <div class="level-progress">
+                    <div class="bar-fill" id="xp-bar"></div>
+                </div>
+                <p id="next-rank-msg" style="font-size: 0.8em; color: #aaa; margin-top:5px;"></p>
+            </div>
+
+            <h3 style="margin-top:20px; color:gold;">Current Quest</h3>
+            <div id="cust-stamps-display"></div>
+            <p id="cust-status-msg"></p>
+        </section>
+    </div>
+
+    <div id="admin-portal" class="container hidden">
+        <button onclick="goHome()" class="back-corner">🏠</button>
+
+        <section id="admin-auth-sec">
+            <h2>Warlord Access</h2>
+            <input type="email" id="admin-email" placeholder="Admin Email">
+            <input type="password" id="admin-pass" placeholder="Password">
+            <button onclick="adminSignIn()" class="large-btn">Login</button>
+            <div style="margin-top:10px;">
+                <button onclick="adminSignUp()" class="secondary small-btn">Register New</button>
+                <button onclick="resetAdminPassword()" class="secondary small-btn">Forgot Pass?</button>
             </div>
         </section>
 
-        <!-- Register Admin -->
-        <section id="register-section" class="hidden">
-            <h2>New Warlord</h2>
-            <input type="text" id="reg-user" placeholder="Username">
-            <input type="password" id="reg-pass" placeholder="Password">
-            <select id="reg-sec-q">
-                <option value="pet">First Pet's Name?</option>
-                <option value="city">Birth City?</option>
-                <option value="food">Favorite Food?</option>
-            </select>
-            <input type="text" id="reg-sec-a" placeholder="Security Answer">
-            <button onclick="registerAdmin()">Register</button>
-            <button class="secondary" onclick="showLogin()">Back</button>
-        </section>
-
-        <!-- Recovery -->
-        <section id="recovery-section" class="hidden">
-            <h2>Recover Power</h2>
-            <input type="text" id="rec-user" placeholder="Username">
-            <select id="rec-sec-q">
-                <option value="pet">First Pet's Name?</option>
-                <option value="city">Birth City?</option>
-                <option value="food">Favorite Food?</option>
-            </select>
-            <input type="text" id="rec-sec-a" placeholder="Answer">
-            <input type="password" id="rec-new-pass" placeholder="New Password">
-            <button onclick="resetPassword()">Reset</button>
-            <button class="secondary" onclick="showLogin()">Back</button>
-        </section>
-
-        <!-- Dashboard -->
-        <div id="dashboard" class="hidden">
+        <section id="admin-dashboard" class="hidden">
             <div class="toolbar">
-                <button onclick="showTab('add-cust')">Add New</button>
-                <button onclick="showTab('list-cust')">List</button>
-                <button onclick="location.reload()" class="secondary">Logout</button>
+                <button onclick="showAdminTab('add')">Add New</button>
+                <button onclick="showAdminTab('list')">List</button>
+                <button onclick="adminSignOut()" class="secondary">Logout</button>
             </div>
 
-            <!-- Add Customer Tab -->
-            <section id="add-cust-section">
+            <div id="adm-add-sec">
                 <h3>Summon Customer</h3>
-                <input type="text" id="cust-name" placeholder="Customer Name">
-                <input type="number" id="cust-mobile" placeholder="Mobile Number">
-                <button onclick="registerCustomer()" class="large-btn">Generate ID Card</button>
-            </section>
+                <input type="text" id="new-name" placeholder="Name">
+                <input type="number" id="new-mobile" placeholder="Mobile">
+                <button onclick="createCustomer()" class="large-btn">Generate ID</button>
+            </div>
 
-            <!-- Customer List Tab -->
-            <section id="list-cust-section" class="hidden">
-                <h3>Loyalty Realm</h3>
-                
+            <div id="adm-list-sec" class="hidden">
                 <div class="tools-panel">
                     <button onclick="exportCSV()" class="small-btn">⬇ Export</button>
                     <button onclick="document.getElementById('csv-input').click()" class="small-btn">⬆ Import</button>
                     <input type="file" id="csv-input" accept=".csv" class="hidden" onchange="importCSV()">
                 </div>
-
                 <div class="search-container">
-                    <input type="text" id="search-input" placeholder="🔍 Name or Mobile..." onkeyup="searchCustomers()">
+                    <input type="text" id="search-input" placeholder="🔍 Search..." onkeyup="searchCustomers()">
                 </div>
-
                 <div id="customer-list">Loading...</div>
-            </section>
-        </div>
-    </div>
-
-    <!-- CONGRATULATIONS MODAL -->
-    <div id="reward-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 class="glow-text">🔥 LEGENDARY 🔥</h2>
-            <p>The Dragon is Pleased!</p>
-            <div class="reward-icon">🐲 🎁</div>
-            <p style="font-size: 1.1em; margin: 15px 0;">
-                <span id="reward-cust-name" style="color: gold; font-weight:bold;"></span> 
-                has collected 6 Orbs.
-            </p>
-            <h3 style="color: #00ff00;">GET 1 FREE SNACK!</h3>
-            <button onclick="redeemReward()" class="large-btn">Give Snack & Reset</button>
-            <button class="secondary" onclick="closeModal('reward-modal')">Close</button>
-        </div>
-    </div>
-
-    <!-- ID CARD MODAL (NEW) -->
-    <div id="id-modal" class="modal hidden">
-        <div class="modal-content" style="max-width: 500px;">
-            <h3>Your Loyalty Card</h3>
-            <div class="canvas-wrapper">
-                <canvas id="cardCanvas" width="450" height="270"></canvas>
             </div>
+        </section>
+    </div>
+
+    <div id="id-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Identity Rune</h3>
+            <div class="canvas-wrapper"><canvas id="cardCanvas" width="450" height="270"></canvas></div>
             <br>
-            <button onclick="downloadID()" class="large-btn">Download Image</button>
+            <button onclick="downloadID()" class="large-btn">Save Image</button>
             <button class="secondary" onclick="closeModal('id-modal')">Close</button>
         </div>
     </div>
