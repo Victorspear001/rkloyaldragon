@@ -68,13 +68,17 @@ function showTab(tab) {
     if(tab === 'list-cust') loadCustomers();
 }
 
-// --- ID CARD GENERATOR ---
-function generateIDCard(name, id) {
+// --- ID CARD GENERATOR (NOW IN MODAL) ---
+function showIDModal(name, id) {
+    document.getElementById('id-modal').classList.remove('hidden');
+    
     const canvas = document.getElementById('cardCanvas');
     const ctx = canvas.getContext('2d');
-    document.getElementById('id-card-area').classList.remove('hidden');
+    
+    // Clear previous drawing
+    ctx.clearRect(0,0, canvas.width, canvas.height);
 
-    // Drawing the card at high resolution
+    // Draw Card
     const grd = ctx.createLinearGradient(0, 0, 450, 270);
     grd.addColorStop(0, "#8a0303"); 
     grd.addColorStop(0.5, "#000000"); 
@@ -128,13 +132,13 @@ async function registerCustomer() {
     });
     const data = await res.json();
     if (res.ok) {
-        generateIDCard(name, data.customerId);
+        showIDModal(name, data.customerId); // Open Modal directly
     } else {
         alert("Error: " + data.error);
     }
 }
 
-// --- LOYALTY LIST, SEARCH & MODAL ---
+// --- LOYALTY LIST ---
 let currentCustomers = [];
 let activeRewardId = null;
 
@@ -186,7 +190,13 @@ function renderList(data) {
         if (c.stamps >= 6) {
             actionBtn = `<button style="background:gold; color:black;" onclick="openRewardModal('${c.customer_id}', '${c.name}')">🎁 Redeem Prize</button>`;
         } else {
-            actionBtn = `<button onclick="addStamp('${c.customer_id}')">Stamp +1</button>`;
+            // Added Minus Button here
+            actionBtn = `
+                <div style="display:flex; gap:5px;">
+                    <button onclick="addStamp('${c.customer_id}')">Stamp +1</button>
+                    <button class="undo-btn" onclick="removeStamp('${c.customer_id}')">➖</button>
+                </div>
+            `;
         }
 
         const div = document.createElement('div');
@@ -206,13 +216,14 @@ function renderList(data) {
 
             <div style="margin-top:10px; border-top:1px solid #333; padding-top:10px; display:flex; gap:10px;">
                  <button class="danger-btn" onclick="deleteCustomer('${c.customer_id}')">Delete</button>
-                 <button class="secondary small-btn" onclick="generateIDCard('${c.name}', '${c.customer_id}')">View ID</button>
+                 <button class="secondary small-btn" onclick="showIDModal('${c.name}', '${c.customer_id}')">View ID</button>
             </div>
         `;
         list.appendChild(div);
     });
 }
 
+// --- STAMPING LOGIC (ADD & REMOVE) ---
 async function addStamp(id) {
     const cust = currentCustomers.find(c => c.customer_id === id);
     if (!cust) return;
@@ -233,15 +244,33 @@ async function addStamp(id) {
     });
 }
 
+// NEW: Remove Stamp Logic
+async function removeStamp(id) {
+    const cust = currentCustomers.find(c => c.customer_id === id);
+    if (!cust || cust.stamps <= 0) return;
+
+    if(!confirm("Remove 1 Stamp?")) return;
+
+    cust.stamps -= 1;
+    searchCustomers(); // Instant UI update
+
+    await fetch(`${API_URL}/customer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'unstamp', id })
+    });
+}
+
+// --- MODALS ---
 function openRewardModal(id, name) {
     activeRewardId = id;
     document.getElementById('reward-cust-name').innerText = name;
     document.getElementById('reward-modal').classList.remove('hidden');
 }
 
-function closeModal() {
-    document.getElementById('reward-modal').classList.add('hidden');
-    activeRewardId = null;
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    if(id === 'reward-modal') activeRewardId = null;
 }
 
 async function redeemReward() {
@@ -250,7 +279,7 @@ async function redeemReward() {
     const cust = currentCustomers.find(c => c.customer_id === activeRewardId);
     if (cust) cust.stamps = 0;
     
-    closeModal();
+    closeModal('reward-modal');
     searchCustomers(); 
 
     await fetch(`${API_URL}/customer`, {
@@ -260,7 +289,6 @@ async function redeemReward() {
     });
 }
 
-// --- SECURE DELETE ---
 async function deleteCustomer(id) {
     if(!confirm("Are you sure you want to PERMANENTLY delete this customer?")) return;
 
