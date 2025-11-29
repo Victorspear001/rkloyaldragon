@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Dragon Stats</title>
+    <meta name="theme-color" content="#8a0303">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <a href="index.html" class="home-icon" title="Home">🏠</a>
+
+    <div class="container glass-panel">
+        <header>
+            <h1>CUSTOMER DUNGEON</h1>
+            <p class="subtitle">Check Your Rank</p>
+        </header>
+
+        <section id="cust-login-sec">
+            <p>Enter your Rune ID</p>
+            <input type="text" id="cust-login-id" placeholder="ID (e.g. RK1234)">
+            <button onclick="customerLogin()" class="large-btn pulse-btn">Check Stats</button>
+        </section>
+
+        <section id="cust-dashboard" class="hidden">
+            <h2 id="display-cust-name" class="glow-text">Warrior</h2>
+            
+            <div class="rpg-card">
+                <div class="level-header">
+                    <span id="rpg-rank">Bronze</span>
+                    <span class="lvl-text">Lvl: <span id="lifetime-count">0</span></span>
+                </div>
+                <div class="level-progress">
+                    <div class="bar-fill" id="xp-bar"></div>
+                </div>
+                <div class="next-rank">Next: <span id="next-rank-name">Silver</span></div>
+            </div>
+
+            <h3 class="quest-title">Current Quest</h3>
+            <div id="cust-stamps-display"></div>
+            
+            <div class="status-card">
+                <p id="cust-status-msg"></p>
+            </div>
+
+            <button onclick="location.reload()" class="secondary small-btn" style="margin-top:20px;">Logout</button>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
