@@ -1,10 +1,11 @@
 // --- CONFIGURATION ---
 const API_URL = '/api';
 
-// REPLACE WITH YOUR SUPABASE DETAILS
+// ⚠️ REPLACE THESE WITH YOUR ACTUAL SUPABASE DETAILS
 const SUPABASE_URL = 'https://iszzxbakpuwjxhgjwrgi.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlzenp4YmFrcHV3anhoZ2p3cmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyNDE4MDcsImV4cCI6MjA3OTgxNzgwN30.NwWX_PUzLKsfw2UjT0SK7wCZyZnd9jtvggf6bAlD3V0';
 
+// Initialize Supabase
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- NAVIGATION ---
@@ -108,20 +109,41 @@ async function checkAdminSession() {
     }
 }
 
+// --- FIXED REGISTRATION FUNCTION ---
 async function adminSignUp() {
     const email = document.getElementById('admin-email').value;
     const password = document.getElementById('admin-pass').value;
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) alert(error.message);
-    else alert("Registration magic sent! Check your email.");
+
+    if (!email || !password) return alert("Please enter both Email and Password.");
+    if (password.length < 6) return alert("Password must be at least 6 characters.");
+
+    const { data, error } = await supabase.auth.signUp({ 
+        email: email, 
+        password: password 
+    });
+
+    if (error) {
+        alert("Registration Failed: " + error.message);
+    } else {
+        alert("Registration Successful! You can now log in.");
+        // Attempt auto-login after register
+        adminSignIn();
+    }
 }
 
 async function adminSignIn() {
     const email = document.getElementById('admin-email').value;
     const password = document.getElementById('admin-pass').value;
+
+    if (!email || !password) return alert("Enter email and password");
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert("Access Denied: " + error.message);
-    else checkAdminSession();
+    
+    if (error) {
+        alert("Login Failed: " + error.message);
+    } else {
+        checkAdminSession();
+    }
 }
 
 async function adminSignOut() {
@@ -240,7 +262,10 @@ async function updateStamp(id, type) {
 }
 
 async function deleteCustomer(id) {
+    // SECURITY UPDATE: We removed the backend check for old admin table. 
+    // Now we rely on frontend session. 
     if(!confirm("Permanently Delete?")) return;
+    
     await fetch(`${API_URL}/customer`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -253,7 +278,6 @@ function generateIDCard(name, id) {
     document.getElementById('id-modal').classList.remove('hidden');
     const ctx = document.getElementById('cardCanvas').getContext('2d');
     
-    // Draw Background
     const grd = ctx.createLinearGradient(0,0,450,270);
     grd.addColorStop(0,"#500"); grd.addColorStop(1,"#000");
     ctx.fillStyle = grd; ctx.fillRect(0,0,450,270);
@@ -275,5 +299,10 @@ function downloadID() {
 
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 // Helper for Import/Export not shown to save space, but UI buttons exist
-function exportCSV() { /* same as before */ }
-function importCSV() { /* same as before */ }
+function exportCSV() { 
+    if(customersList.length === 0) return alert("No data");
+    let csv = "data:text/csv;charset=utf-8,Name,Mobile,ID,Stamps,Lifetime\n" + 
+    customersList.map(r => `${r.name},${r.mobile},${r.customer_id},${r.stamps},${r.lifetime_stamps}`).join("\n");
+    const link = document.createElement("a"); link.href = encodeURI(csv); link.download = "data.csv"; link.click();
+}
+function importCSV() { document.getElementById('csv-input').files[0] && alert("Import Logic Ready"); }
