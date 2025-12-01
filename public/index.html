@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Dragon Stats</title>
+    <title>RK Dragon Loyalty</title>
     <meta name="theme-color" content="#8a0303">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    
-    <a href="index.html" class="home-icon" title="Home">🏠</a>
 
     <div class="container glass-panel">
         <header>
-            <h1>CUSTOMER DUNGEON</h1>
+            <div class="logo-glow" onclick="secretAdminAccess()" style="cursor:pointer; user-select:none;">🐲</div>
+            <h1>CUSTOMER GRIMOIRE</h1>
             <p class="subtitle">Check Your Rank</p>
         </header>
 
@@ -51,5 +50,22 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // SECRET DOOR LOGIC
+        let tapCount = 0;
+        let tapTimer = null;
+        function secretAdminAccess() {
+            tapCount++;
+            clearTimeout(tapTimer);
+            tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
+            
+            if (tapCount === 5) {
+                document.body.style.background = "gold"; // Visual flash
+                setTimeout(() => {
+                    window.location.href = 'dashboard_secure.html'; // Redirect
+                }, 300);
+            }
+        }
+    </script>
 </body>
 </html>
