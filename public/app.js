@@ -1,127 +1,28 @@
 // --- CONFIGURATION ---
 const API_URL = '/api';
 
-// ⚠️ PASTE YOUR SUPABASE KEYS HERE
+// ⚠️ PASTE KEYS HERE
 const SUPABASE_URL = 'https://iszzxbakpuwjxhgjwrgi.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlzenp4YmFrcHV3anhoZ2p3cmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyNDE4MDcsImV4cCI6MjA3OTgxNzgwN30.NwWX_PUzLKsfw2UjT0SK7wCZyZnd9jtvggf6bAlD3V0'; 
 
 let supabaseClient = null;
 if (typeof supabase !== 'undefined') {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    // Listen for Auth Changes
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-        console.log("Auth Event:", event);
-        if (event === 'SIGNED_IN') {
-            if(document.getElementById('admin-portal')) {
-                showSection('admin-dashboard');
-                loadCustomers();
-            }
-        }
-        if (event === 'PASSWORD_RECOVERY') {
-            showSection('admin-update-pass-sec');
-        }
-    });
 }
 
 // --- UTILS ---
 function showSection(id) {
-    const ids = ['admin-login-sec', 'admin-register-sec', 'admin-forgot-sec', 'admin-update-pass-sec', 'admin-dashboard'];
-    ids.forEach(sid => {
+    ['admin-login-sec', 'admin-register-sec', 'admin-forgot-sec', 'admin-update-pass-sec', 'admin-dashboard'].forEach(sid => {
         const el = document.getElementById(sid);
         if(el) el.classList.add('hidden');
     });
     document.getElementById(id).classList.remove('hidden');
 }
 
-// ==========================================
-// 🛡️ ADMIN AUTH (FIXED LOGIC)
-// ==========================================
-
-async function adminSignUp() {
-    const email = document.getElementById('reg-email').value.trim();
-    const password = document.getElementById('reg-pass').value.trim();
-    const username = document.getElementById('reg-username').value.trim();
-
-    if (!email || !password || !username) return alert("Please fill all fields");
-    if (password.length < 6) return alert("Password must be 6+ characters");
-
-    // 1. Register Auth
-    const { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
-    
-    if (authError) return alert("Registration Error: " + authError.message);
-
-    // 2. Save Username
-    const { error: dbError } = await supabaseClient
-        .from('admin_profiles')
-        .insert([{ username: username, email: email }]);
-
-    if (dbError) {
-        alert("Account created, but Username failed: " + dbError.message);
-    } else {
-        alert("Registration Success! Please Login.");
-        showSection('admin-login-sec');
-    }
-}
-
-async function adminSignIn() {
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-pass').value.trim();
-
-    if (!username || !password) return alert("Enter Username and Password");
-
-    // 1. Get Email from Username
-    const { data, error } = await supabaseClient
-        .from('admin_profiles')
-        .select('email')
-        .eq('username', username)
-        .single();
-
-    if (error || !data) {
-        console.error("DB Lookup Error:", error);
-        return alert("Username not found! (Check spelling or Register first)");
-    }
-
-    // 2. Login with Email
-    const { error: signInError } = await supabaseClient.auth.signInWithPassword({ 
-        email: data.email, 
-        password: password 
-    });
-    
-    if (signInError) {
-        alert("Incorrect Password");
-    } else {
-        // Success! The onAuthStateChange listener handles the UI
-        console.log("Login Successful");
-    }
-}
-
-async function adminSignOut() {
-    await supabaseClient.auth.signOut();
-    window.location.reload();
-}
-
-async function resetAdminPassword() {
-    const email = document.getElementById('forgot-email').value;
-    if(!email) return alert("Enter email");
-    
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.href, // Redirects back here
-    });
-    if(error) alert(error.message);
-    else alert("Reset link sent! Check your email.");
-}
-
-async function updateAdminPassword() {
-    const newPass = document.getElementById('new-password').value;
-    if(newPass.length < 6) return alert("Password too short");
-
-    const { error } = await supabaseClient.auth.updateUser({ password: newPass });
-    if (error) alert("Error: " + error.message);
-    else {
-        alert("Password Changed! Please Login.");
-        adminSignOut();
-    }
+// --- SVG BADGES ---
+function getRankSVG(rankName) {
+    const c = { "BRONZE":"#cd7f32", "SILVER":"#c0c0c0", "GOLD":"#ffd700", "CRYSTAL":"#00ffff", "MASTER":"#dc143c", "CHAMPION":"#ff4500", "TITAN":"#e6e6fa" }[rankName] || "#fff";
+    return `<svg viewBox="0 0 100 100" fill="none"><path d="M50 5 L90 20 V50 Q90 80 50 95 Q10 80 10 50 V20 Z" fill="${c}" fill-opacity="0.3" stroke="${c}" stroke-width="3"/><path d="M50 20 V80" stroke="${c}" stroke-width="1"/><circle cx="50" cy="50" r="12" fill="${c}"/></svg>`;
 }
 
 // ==========================================
@@ -141,7 +42,7 @@ async function customerLogin() {
             document.getElementById('cust-dashboard').classList.remove('hidden');
             renderCustomerStats(data);
         } else alert("ID not found.");
-    } catch (e) { alert("Server connection failed."); }
+    } catch (e) { alert("Connection Error"); }
 }
 
 function calculateRank(total) {
@@ -165,8 +66,10 @@ function renderCustomerStats(c) {
     if(badgeEl) badgeEl.innerHTML = getRankSVG(rankData.name);
 
     document.getElementById('next-rank-name').innerText = rankData.next;
-    document.getElementById('xp-bar').style.width = Math.min(rankData.pct, 100) + "%";
-    document.getElementById('xp-bar').style.background = rankData.color;
+    const barEl = document.getElementById('xp-bar');
+    barEl.style.width = Math.min(rankData.pct, 100) + "%";
+    barEl.style.background = rankData.color;
+    barEl.style.boxShadow = `0 0 10px ${rankData.color}`;
 
     let html = '<div class="stamp-container">';
     for(let i=0; i<6; i++) html += `<div class="orb ${i < c.stamps ? 'filled' : ''}"></div>`;
@@ -174,9 +77,65 @@ function renderCustomerStats(c) {
     document.getElementById('cust-stamps-display').innerHTML = html;
     
     const msg = c.stamps >= 6 ? "🎉 REWARD UNLOCKED!" : `Collect ${6 - c.stamps} more.`;
-    const msgEl = document.getElementById('cust-status-msg');
-    msgEl.innerText = msg;
-    msgEl.style.color = c.stamps >= 6 ? "#0f0" : "#aaa";
+    document.getElementById('cust-status-msg').innerText = msg;
+}
+
+// ==========================================
+// 🛡️ ADMIN AUTH
+// ==========================================
+async function adminSignUp() {
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-pass').value;
+    const username = document.getElementById('reg-username').value;
+    if (!email || !password || !username) return alert("Fill all fields");
+    if (password.length < 6) return alert("Password too short");
+
+    const { data: existing } = await supabaseClient.from('admin_profiles').select('username').eq('username', username).single();
+    if(existing) return alert("Username taken");
+
+    const { error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) return alert(error.message);
+
+    await supabaseClient.from('admin_profiles').insert([{ username, email }]);
+    alert("Success! Login now.");
+    showSection('admin-login-sec');
+}
+
+async function adminSignIn() {
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-pass').value;
+    if (!username || !password) return alert("Enter credentials");
+
+    const { data } = await supabaseClient.from('admin_profiles').select('email').eq('username', username).single();
+    if (!data) return alert("Username not found");
+
+    const { error } = await supabaseClient.auth.signInWithPassword({ email: data.email, password });
+    if (error) alert("Incorrect Password");
+}
+
+async function adminSignOut() {
+    await supabaseClient.auth.signOut();
+    window.location.reload();
+}
+
+async function resetAdminPassword() {
+    const email = document.getElementById('forgot-email').value;
+    if(!email) return alert("Enter email");
+    
+    // Redirect to the Secure Dashboard
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.href, 
+    });
+    if(error) alert(error.message);
+    else alert("Reset link sent! Check email.");
+}
+
+async function updateAdminPassword() {
+    const newPass = document.getElementById('new-password').value;
+    if(newPass.length < 6) return alert("Too short");
+    const { error } = await supabaseClient.auth.updateUser({ password: newPass });
+    if (error) alert(error.message);
+    else { alert("Password Updated! Please Login."); adminSignOut(); }
 }
 
 // --- ADMIN LIST ---
@@ -184,7 +143,7 @@ let customersList = [];
 async function loadCustomers() {
     const el = document.getElementById('customer-list');
     if(!el) return;
-    el.innerHTML = '<div style="color:#888;">Summoning data...</div>';
+    el.innerHTML = '<div style="color:#888;">Summoning...</div>';
     const res = await fetch(`${API_URL}/customer?action=list`);
     customersList = await res.json();
     renderAdminList(customersList);
@@ -194,7 +153,6 @@ function renderAdminList(data) {
     const el = document.getElementById('customer-list');
     if(!el) return;
     el.innerHTML = "";
-    
     data.forEach(c => {
         const rank = calculateRank(c.lifetime_stamps || 0);
         let btns = '';
@@ -216,7 +174,7 @@ function renderAdminList(data) {
         const div = document.createElement('div');
         div.className = 'cust-item';
         div.innerHTML = `
-            <div class="cust-rank-badge" style="position:absolute; top:10px; right:10px; width:30px;">${getRankSVG(rank.name)}</div>
+            <div style="position:absolute; top:10px; right:10px; width:30px;">${getRankSVG(rank.name)}</div>
             <div class="cust-header">
                 <div>
                     <div class="cust-name">${c.name}</div>
@@ -226,12 +184,9 @@ function renderAdminList(data) {
             <div style="font-size:0.8em; color:#888; margin-bottom:10px;">
                 Mobile: ${c.mobile} | Lvl: <span style="color:${rank.color}">${rank.name}</span>
             </div>
-            
-            <div class="stamp-container" style="justify-content:flex-start; margin: 10px 0;">
-                ${getOrbHTML(c.stamps)}
-            </div>
+            <div class="stamp-container" style="justify-content:flex-start; margin: 10px 0;">${getOrbHTML(c.stamps)}</div>
             ${btns}
-            <div class="action-row" style="margin-top:10px;">
+            <div class="action-row" style="margin-top:10px; display:flex; gap:10px;">
                 <button class="secondary small-btn" onclick="generateIDCard('${c.name}', '${c.customer_id}')">ID Card</button>
                 <button class="secondary small-btn danger" onclick="deleteCustomer('${c.customer_id}')">Delete</button>
             </div>
@@ -240,23 +195,83 @@ function renderAdminList(data) {
     });
 }
 
-function getRankSVG(rankName) {
-    const c = {
-        "BRONZE": "#cd7f32", "SILVER": "#c0c0c0", "GOLD": "#ffd700",
-        "CRYSTAL": "#00ffff", "MASTER": "#dc143c", "CHAMPION": "#ff4500", "TITAN": "#e6e6fa"
-    }[rankName.split(' ')[0]] || "#fff";
-    
-    return `<svg viewBox="0 0 100 100" fill="none" style="filter:drop-shadow(0 0 5px ${c})">
-        <path d="M50 5 L90 20 V50 Q90 80 50 95 Q10 80 10 50 V20 Z" fill="${c}" fill-opacity="0.2" stroke="${c}" stroke-width="2"/>
-        <path d="M50 20 V80 M20 50 H80" stroke="${c}" stroke-width="1" stroke-opacity="0.5"/>
-        <circle cx="50" cy="50" r="15" fill="${c}"/>
-    </svg>`;
-}
-
 function getOrbHTML(count) {
     let html = '';
     for(let i=0; i<6; i++) html += `<div class="orb ${i < count ? 'filled' : ''}"></div>`;
     return html;
+}
+
+// --- PREMIUM ID CARD ---
+function generateIDCard(name, id) {
+    document.getElementById('id-modal').classList.remove('hidden');
+    const canvas = document.getElementById('cardCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Background: Radial Deep Red/Black
+    const grd = ctx.createRadialGradient(225, 135, 20, 225, 135, 250);
+    grd.addColorStop(0, "#2a0a0a");
+    grd.addColorStop(0.7, "#000000");
+    grd.addColorStop(1, "#1a0500");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, 450, 270);
+
+    // Watermark
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.font = "180px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#ff4500"; 
+    ctx.fillText("🐲", 225, 135);
+    ctx.restore();
+
+    // Gold Dust
+    ctx.save();
+    ctx.fillStyle = "#ffd700";
+    for(let i=0; i<30; i++) {
+        const x = Math.random() * 450;
+        const y = Math.random() * 270;
+        ctx.globalAlpha = Math.random() * 0.3;
+        ctx.beginPath();
+        ctx.arc(x, y, Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+
+    // Borders
+    ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 6; ctx.strokeRect(5, 5, 440, 260);
+    ctx.strokeStyle = "#ff4500"; ctx.lineWidth = 1; ctx.strokeRect(12, 12, 426, 246);
+
+    // Header
+    ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(255, 69, 0, 0.8)"; ctx.shadowBlur = 15;
+    ctx.fillStyle = "#ffd700"; ctx.font = "bold 32px serif"; ctx.fillText("RK DRAGON", 225, 60);
+    ctx.shadowBlur = 0;
+
+    // ID
+    ctx.fillStyle = "rgba(255, 215, 0, 0.1)"; ctx.fillRect(125, 110, 200, 50);
+    ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 1; ctx.strokeRect(125, 110, 200, 50);
+    ctx.fillStyle = "#ffffff"; ctx.font = "bold 36px monospace"; ctx.fillText(id, 225, 145);
+
+    // Name
+    ctx.fillStyle = "#ffd700"; ctx.font = "italic 22px serif"; 
+    let dName = name.toUpperCase(); if(dName.length>20) dName=dName.substring(0,18)+"..";
+    ctx.fillText(dName, 225, 210);
+
+    // Footer
+    ctx.fillStyle = "linear-gradient(90deg, #8b0000, #ff4500)";
+    const fGrd = ctx.createLinearGradient(0, 240, 450, 240);
+    fGrd.addColorStop(0, "#8b0000"); fGrd.addColorStop(0.5, "#ff4500"); fGrd.addColorStop(1, "#8b0000");
+    ctx.fillStyle = fGrd; ctx.fillRect(5, 235, 440, 30);
+    ctx.fillStyle = "#000"; ctx.font = "bold 12px sans-serif"; ctx.fillText("OFFICIAL LOYALTY CARD", 225, 254);
+}
+
+function downloadID() {
+    const link = document.createElement('a'); link.download = 'RK_Card.jpg';
+    link.href = document.getElementById('cardCanvas').toDataURL(); link.click();
 }
 
 // --- ACTIONS ---
@@ -278,25 +293,9 @@ async function updateStamp(id, type) {
     await fetch(`${API_URL}/customer`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action: 'stamp', id, type}) });
 }
 async function deleteCustomer(id) {
-    if(!confirm("Permanently Delete?")) return;
+    if(!confirm("Delete?")) return;
     await fetch(`${API_URL}/customer`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action: 'delete', id}) });
     loadCustomers();
-}
-function generateIDCard(name, id) {
-    document.getElementById('id-modal').classList.remove('hidden');
-    const ctx = document.getElementById('cardCanvas').getContext('2d');
-    const grd = ctx.createLinearGradient(0,0,450,270);
-    grd.addColorStop(0,"#300"); grd.addColorStop(1,"#000");
-    ctx.fillStyle = grd; ctx.fillRect(0,0,450,270);
-    ctx.strokeStyle = "gold"; ctx.lineWidth = 6; ctx.strokeRect(5,5,440,260);
-    ctx.textAlign = "center";
-    ctx.fillStyle = "gold"; ctx.font = "bold 30px serif"; ctx.fillText("RK DRAGON", 225, 50);
-    ctx.fillStyle = "white"; ctx.font = "bold 45px sans-serif"; ctx.fillText(id, 225, 130);
-    ctx.fillStyle = "#fa0"; ctx.font = "italic 24px serif"; ctx.fillText(name, 225, 180);
-}
-function downloadID() {
-    const link = document.createElement('a'); link.download = 'RK_Card.jpg';
-    link.href = document.getElementById('cardCanvas').toDataURL(); link.click();
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function showAdminTab(tab) {
@@ -311,8 +310,7 @@ function searchCustomers() {
 }
 function exportCSV() { 
     if(customersList.length === 0) return alert("No data");
-    let csv = "data:text/csv;charset=utf-8,Name,Mobile,ID,Stamps,Lifetime\n" + 
-    customersList.map(r => `${r.name},${r.mobile},${r.customer_id},${r.stamps},${r.lifetime_stamps}`).join("\n");
+    let csv = "data:text/csv;charset=utf-8,Name,Mobile,ID,Stamps,Lifetime\n" + customersList.map(r => `${r.name},${r.mobile},${r.customer_id},${r.stamps},${r.lifetime_stamps}`).join("\n");
     const link = document.createElement("a"); link.href = encodeURI(csv); link.download = "data.csv"; link.click();
 }
 function importCSV() { document.getElementById('csv-input').files[0] && alert("Import Logic Ready"); }
