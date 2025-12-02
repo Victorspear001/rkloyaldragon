@@ -29,7 +29,7 @@ function showSection(id) {
 }
 
 // ==========================================
-// 🎨 NEW ID CARD GENERATOR (With Rank Shield)
+// 🎨 LEGENDARY ID CARD GENERATOR
 // ==========================================
 function generateIDCard(name, id, lifetimeStamps = 0) {
     document.getElementById('id-modal').classList.remove('hidden');
@@ -38,110 +38,133 @@ function generateIDCard(name, id, lifetimeStamps = 0) {
     
     const rank = calculateRank(lifetimeStamps);
 
-    // 1. CLEAR
+    // 1. CLEAR & BACKGROUND
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 2. BACKGROUND: Matte Black + Rank Tint
+    // Deep Space Gradient
     const grd = ctx.createLinearGradient(0, 0, 450, 270);
-    grd.addColorStop(0, "#151515");
-    grd.addColorStop(1, "#000000");
+    grd.addColorStop(0, "#0a0a0a");
+    grd.addColorStop(1, "#1a1a1a");
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, 450, 270);
 
-    // 3. RANK BORDER GLOW
-    ctx.shadowBlur = 20;
+    // 2. HEXAGON PATTERN (Subtle Tech/Magic BG)
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+    ctx.lineWidth = 1;
+    for (let y = 0; y < 270; y += 30) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(450, y);
+        ctx.stroke();
+    }
+    // Diagonal lines
+    for (let x = -200; x < 450; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x + 270, 270);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // 3. RANK GLOW BORDER
+    // Create a glow based on rank color
+    ctx.shadowBlur = 25;
     ctx.shadowColor = rank.color;
     ctx.strokeStyle = rank.color; 
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2;
     ctx.strokeRect(10, 10, 430, 250);
     ctx.shadowBlur = 0; // Reset
 
-    // 4. WATERMARK
+    // 4. DRAW RANK CREST (The Legendary Icon)
     ctx.save();
-    ctx.globalAlpha = 0.1;
-    ctx.font = "150px serif";
-    ctx.textAlign = "right";
-    ctx.textBaseline = "bottom";
-    ctx.fillStyle = rank.color; 
-    ctx.fillText("🐲", 420, 250);
-    ctx.restore();
-
-    // 5. DRAW RANK SHIELD (Custom Shape)
-    ctx.save();
-    ctx.translate(360, 40); // Top Right Position
+    ctx.translate(380, 50); // Top Right Corner
+    
+    // Outer Diamond
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(60, 0);
-    ctx.lineTo(60, 50);
-    ctx.quadraticCurveTo(30, 80, 0, 50);
+    ctx.moveTo(0, -35); // Top
+    ctx.lineTo(30, 0);  // Right
+    ctx.lineTo(0, 35);  // Bottom
+    ctx.lineTo(-30, 0); // Left
     ctx.closePath();
     
-    // Fill Shield
-    ctx.fillStyle = rank.color;
+    // Fill with Rank Gradient
+    const badgeGrad = ctx.createLinearGradient(0, -35, 0, 35);
+    badgeGrad.addColorStop(0, rank.color);
+    badgeGrad.addColorStop(1, "#000");
+    ctx.fillStyle = badgeGrad;
     ctx.fill();
+    
+    // Border
     ctx.strokeStyle = "#fff";
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Rank Initial inside Shield
-    ctx.fillStyle = "#000";
-    ctx.font = "bold 30px sans-serif";
+    // Inner Rank Letter
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 24px serif";
     ctx.textAlign = "center";
-    ctx.fillText(rank.name[0], 30, 45); // First Letter (e.g. T for Titan)
+    ctx.textBaseline = "middle";
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 5;
+    ctx.fillText(rank.name[0], 0, 2); // T for Titan, G for Gold
     ctx.restore();
 
-    // 6. HEADER
+    // 5. HEADER
     ctx.textAlign = "left";
     ctx.fillStyle = rank.color; 
-    ctx.font = "bold 28px 'Cinzel', serif"; 
+    ctx.font = "bold 26px 'Cinzel', serif"; 
     ctx.shadowColor = rank.color;
     ctx.shadowBlur = 10;
-    ctx.fillText("RK DRAGON", 30, 55);
+    ctx.fillText("RK DRAGON", 30, 50);
     ctx.shadowBlur = 0;
 
-    // Rank Name Under Header
-    ctx.font = "12px sans-serif";
-    ctx.letterSpacing = "3px";
-    ctx.fillStyle = "#fff";
-    ctx.fillText(rank.name + " MEMBER", 30, 75);
+    // Subheader
+    ctx.font = "10px sans-serif";
+    ctx.letterSpacing = "2px";
+    ctx.fillStyle = "#aaa";
+    ctx.fillText("OFFICIAL GUILD PASS", 30, 68);
 
-    // 7. CUSTOMER DETAILS BOX
-    // EMV Chip Style Box
-    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-    ctx.roundRect(30, 110, 250, 60, 10);
+    // 6. EMV CHIP (Credit Card Style)
+    ctx.fillStyle = "linear-gradient(135deg, #d4af37, #aa8833)";
+    const chipGrad = ctx.createLinearGradient(30, 100, 80, 140);
+    chipGrad.addColorStop(0, "#ebd197");
+    chipGrad.addColorStop(1, "#b38b38");
+    ctx.fillStyle = chipGrad;
+    ctx.roundRect(30, 100, 50, 35, 5);
     ctx.fill();
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.strokeStyle = "rgba(0,0,0,0.3)";
     ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.strokeRect(30, 100, 50, 35); // Outline
 
-    // ID Number
+    // 7. CUSTOMER ID (Central Glowing)
+    ctx.textAlign = "left";
     ctx.fillStyle = "#fff";
-    ctx.font = "bold 36px monospace";
-    ctx.shadowColor = "black";
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-    ctx.fillText(id, 45, 152);
-    ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+    ctx.font = "bold 34px monospace";
+    ctx.shadowColor = rank.color;
+    ctx.shadowBlur = 15;
+    ctx.fillText(id, 30, 180); // Main ID Display
+    ctx.shadowBlur = 0;
 
-    // Label
-    ctx.fillStyle = "#888";
-    ctx.font = "10px sans-serif";
+    // 8. NAME & RANK TEXT
+    ctx.fillStyle = "#fff";
+    ctx.font = "14px sans-serif";
     ctx.letterSpacing = "1px";
-    ctx.fillText("RUNE ID", 45, 125);
+    ctx.fillText(rank.name + " TIER", 30, 215);
 
-    // 8. NAME
     ctx.fillStyle = rank.color;
-    ctx.font = "italic 24px serif";
+    ctx.font = "italic 22px serif";
     let dName = name.toUpperCase();
-    if(dName.length > 20) dName = dName.substring(0, 18) + "..";
-    ctx.fillText(dName, 30, 230);
+    if(dName.length > 22) dName = dName.substring(0, 20) + "..";
+    ctx.fillText(dName, 30, 240);
 
-    // 9. FOOTER STRIP
-    ctx.fillStyle = rank.color;
-    ctx.fillRect(400, 235, 30, 5); // Accent mark instead of full bar
-    ctx.fillStyle = "#666";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("OFFICIAL CARD", 30, 250);
+    // 9. QR CODE PLACEHOLDER (Visual only)
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(370, 180, 50, 50);
+    ctx.fillStyle = "#000";
+    ctx.font = "8px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("SCAN", 395, 208);
 }
 
 function downloadID() {
@@ -150,7 +173,7 @@ function downloadID() {
 }
 
 // ==========================================
-// 📥 SMART CSV IMPORT
+// 📥 IMPORT / EXPORT LOGIC
 // ==========================================
 function importCSV() {
     const fileInput = document.getElementById('csv-input');
@@ -169,7 +192,7 @@ function importCSV() {
         const idxStamps = headers.findIndex(h => h.includes('stamps') && !h.includes('lifetime'));
         const idxLife = headers.findIndex(h => h.includes('lifetime'));
 
-        if(idxName === -1 || idxID === -1) return alert("CSV Error: Need Name & ID");
+        if(idxName === -1 || idxID === -1) return alert("CSV Error: Need Name & ID columns");
 
         let batch = [];
         let successCount = 0;
@@ -204,7 +227,7 @@ function importCSV() {
                 }
             }
         }
-        alert(`Success! ${successCount} imported.`);
+        alert(`Success! ${successCount} records imported.`);
         loadCustomers();
         fileInput.value = "";
     };
@@ -280,8 +303,12 @@ function renderCustomerStats(c) {
     if(badgeEl) badgeEl.innerHTML = getRankSVG(rankData.name);
 
     if(document.getElementById('next-rank-name')) document.getElementById('next-rank-name').innerText = rankData.next;
-    document.getElementById('xp-bar').style.width = Math.min(rankData.pct, 100) + "%";
-    document.getElementById('xp-bar').style.background = rankData.color;
+    
+    const barEl = document.getElementById('xp-bar');
+    if(barEl) {
+        barEl.style.width = Math.min(rankData.pct, 100) + "%";
+        barEl.style.background = rankData.color;
+    }
 
     let html = '<div class="stamp-container">';
     for(let i=0; i<6; i++) html += `<div class="orb ${i < c.stamps ? 'filled' : ''}"></div>`;
@@ -294,7 +321,7 @@ function renderCustomerStats(c) {
 }
 
 // ==========================================
-// 🛡️ ADMIN AUTH & LOGIC
+// 🛡️ ADMIN AUTH
 // ==========================================
 async function adminSignUp() {
     const email = document.getElementById('reg-email').value;
@@ -339,9 +366,10 @@ async function updateAdminPassword() {
     const newPass = document.getElementById('new-password').value;
     if(newPass.length < 6) return alert("Too short");
     const { error } = await supabaseClient.auth.updateUser({ password: newPass });
-    if (error) alert(error.message); else { alert("Updated! Login."); adminSignOut(); }
+    if (error) alert(error.message); else { alert("Updated! Login now."); adminSignOut(); }
 }
 
+// --- ADMIN LIST ---
 let customersList = [];
 async function loadCustomers() {
     const el = document.getElementById('customer-list');
@@ -386,6 +414,7 @@ function getOrbHTML(count) {
     let html = ''; for(let i=0; i<6; i++) html += `<div class="orb ${i < count ? 'filled' : ''}"></div>`; return html;
 }
 
+// --- ACTIONS ---
 async function createCustomer() {
     const name = document.getElementById('new-name').value;
     const mobile = document.getElementById('new-mobile').value;
