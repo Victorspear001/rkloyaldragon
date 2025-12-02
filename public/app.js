@@ -9,7 +9,6 @@ let supabaseClient = null;
 if (typeof supabase !== 'undefined') {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    // Auth Listener
     supabaseClient.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && document.getElementById('admin-portal')) {
             showSection('admin-dashboard');
@@ -30,114 +29,119 @@ function showSection(id) {
 }
 
 // ==========================================
-// 🎨 NEW STYLISH ID CARD GENERATOR
+// 🎨 NEW ID CARD GENERATOR (With Rank Shield)
 // ==========================================
 function generateIDCard(name, id, lifetimeStamps = 0) {
     document.getElementById('id-modal').classList.remove('hidden');
     const canvas = document.getElementById('cardCanvas');
     const ctx = canvas.getContext('2d');
     
+    const rank = calculateRank(lifetimeStamps);
+
     // 1. CLEAR
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 2. BACKGROUND: Matte Black with Texture
+    // 2. BACKGROUND: Matte Black + Rank Tint
     const grd = ctx.createLinearGradient(0, 0, 450, 270);
-    grd.addColorStop(0, "#1a1a1a");
+    grd.addColorStop(0, "#151515");
     grd.addColorStop(1, "#000000");
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, 450, 270);
 
-    // 3. GOLD BORDER
-    ctx.strokeStyle = "#d4af37"; // Metallic Gold
+    // 3. RANK BORDER GLOW
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = rank.color;
+    ctx.strokeStyle = rank.color; 
     ctx.lineWidth = 4;
     ctx.strokeRect(10, 10, 430, 250);
-    
-    // Inner thin border
-    ctx.strokeStyle = "rgba(212, 175, 55, 0.3)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(16, 16, 418, 238);
+    ctx.shadowBlur = 0; // Reset
 
-    // 4. WATERMARK (Dragon)
+    // 4. WATERMARK
     ctx.save();
     ctx.globalAlpha = 0.1;
     ctx.font = "150px serif";
     ctx.textAlign = "right";
     ctx.textBaseline = "bottom";
-    ctx.fillStyle = "#ff4500"; 
+    ctx.fillStyle = rank.color; 
     ctx.fillText("🐲", 420, 250);
     ctx.restore();
 
-    // 5. EMV CHIP (Credit Card Style)
-    // Chip Background
-    ctx.fillStyle = "#e6c265";
-    ctx.roundRect(35, 120, 50, 40, 5);
-    ctx.fill();
-    // Chip Details
-    ctx.strokeStyle = "#aa8833";
-    ctx.lineWidth = 1;
+    // 5. DRAW RANK SHIELD (Custom Shape)
+    ctx.save();
+    ctx.translate(360, 40); // Top Right Position
     ctx.beginPath();
-    ctx.moveTo(35, 140); ctx.lineTo(85, 140); // Horizontal Middle
-    ctx.moveTo(60, 120); ctx.lineTo(60, 160); // Vertical Middle
+    ctx.moveTo(0, 0);
+    ctx.lineTo(60, 0);
+    ctx.lineTo(60, 50);
+    ctx.quadraticCurveTo(30, 80, 0, 50);
+    ctx.closePath();
+    
+    // Fill Shield
+    ctx.fillStyle = rank.color;
+    ctx.fill();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
     ctx.stroke();
-    ctx.strokeRect(45, 130, 30, 20); // Inner Box
+
+    // Rank Initial inside Shield
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 30px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(rank.name[0], 30, 45); // First Letter (e.g. T for Titan)
+    ctx.restore();
 
     // 6. HEADER
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#d4af37"; 
+    ctx.textAlign = "left";
+    ctx.fillStyle = rank.color; 
     ctx.font = "bold 28px 'Cinzel', serif"; 
-    ctx.shadowColor = "rgba(212, 175, 55, 0.5)";
+    ctx.shadowColor = rank.color;
     ctx.shadowBlur = 10;
-    ctx.fillText("RK DRAGON", 420, 50);
+    ctx.fillText("RK DRAGON", 30, 55);
     ctx.shadowBlur = 0;
 
-    ctx.font = "10px sans-serif";
-    ctx.letterSpacing = "2px";
-    ctx.fillStyle = "#888";
-    ctx.fillText("PREMIUM MEMBER", 420, 65);
-
-    // 7. CUSTOMER DETAILS
-    ctx.textAlign = "left";
-    
-    // Rank Badge Text
-    const rank = calculateRank(lifetimeStamps);
-    ctx.fillStyle = rank.color; 
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText(rank.name, 35, 50);
-
-    // ID Number (Big & Embossed look)
+    // Rank Name Under Header
+    ctx.font = "12px sans-serif";
+    ctx.letterSpacing = "3px";
     ctx.fillStyle = "#fff";
-    ctx.font = "bold 32px monospace";
+    ctx.fillText(rank.name + " MEMBER", 30, 75);
+
+    // 7. CUSTOMER DETAILS BOX
+    // EMV Chip Style Box
+    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.roundRect(30, 110, 250, 60, 10);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // ID Number
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 36px monospace";
     ctx.shadowColor = "black";
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
-    ctx.fillText(id, 100, 150);
-    ctx.shadowOffsetX = 0; 
-    ctx.shadowOffsetY = 0; // Reset
+    ctx.fillText(id, 45, 152);
+    ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
 
     // Label
+    ctx.fillStyle = "#888";
+    ctx.font = "10px sans-serif";
+    ctx.letterSpacing = "1px";
+    ctx.fillText("RUNE ID", 45, 125);
+
+    // 8. NAME
+    ctx.fillStyle = rank.color;
+    ctx.font = "italic 24px serif";
+    let dName = name.toUpperCase();
+    if(dName.length > 20) dName = dName.substring(0, 18) + "..";
+    ctx.fillText(dName, 30, 230);
+
+    // 9. FOOTER STRIP
+    ctx.fillStyle = rank.color;
+    ctx.fillRect(400, 235, 30, 5); // Accent mark instead of full bar
     ctx.fillStyle = "#666";
     ctx.font = "10px sans-serif";
-    ctx.fillText("MEMBER ID", 100, 125);
-
-    // Name
-    ctx.fillStyle = "#d4af37";
-    ctx.font = "italic 20px serif";
-    let dName = name.toUpperCase();
-    if(dName.length > 25) dName = dName.substring(0, 22) + "..";
-    ctx.fillText(dName, 35, 230);
-
-    // 8. HOLOGRAPHIC SHINE (Diagonal lines)
-    ctx.save();
-    ctx.globalCompositeOperation = "overlay";
-    const holoGrad = ctx.createLinearGradient(0, 0, 450, 270);
-    holoGrad.addColorStop(0, "rgba(255,255,255,0)");
-    holoGrad.addColorStop(0.4, "rgba(255,255,255,0)");
-    holoGrad.addColorStop(0.5, "rgba(255,255,255,0.1)");
-    holoGrad.addColorStop(0.6, "rgba(255,255,255,0)");
-    holoGrad.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = holoGrad;
-    ctx.fillRect(0,0,450,270);
-    ctx.restore();
+    ctx.fillText("OFFICIAL CARD", 30, 250);
 }
 
 function downloadID() {
@@ -146,52 +150,38 @@ function downloadID() {
 }
 
 // ==========================================
-// 📥 SMART CSV IMPORT LOGIC (FIXED)
+// 📥 SMART CSV IMPORT
 // ==========================================
 function importCSV() {
     const fileInput = document.getElementById('csv-input');
     const file = fileInput.files[0];
-    
     if (!file) { fileInput.click(); return; }
 
     const reader = new FileReader();
     reader.onload = async function(e) {
         const text = e.target.result;
-        // Handle Windows (\r\n) and Unix (\n) line endings
         const lines = text.split(/\r?\n/);
-        
-        if (lines.length < 2) return alert("CSV is empty or invalid format");
+        if (lines.length < 2) return alert("Invalid CSV");
 
-        // 1. Parse Headers to find column indexes
         const headers = lines[0].toLowerCase().split(",").map(h => h.trim());
         const idxName = headers.findIndex(h => h.includes('name'));
-        const idxMobile = headers.findIndex(h => h.includes('mobile'));
         const idxID = headers.findIndex(h => h.includes('id'));
         const idxStamps = headers.findIndex(h => h.includes('stamps') && !h.includes('lifetime'));
         const idxLife = headers.findIndex(h => h.includes('lifetime'));
 
-        if(idxName === -1 || idxID === -1) {
-            return alert("CSV Error: Must have headers 'Name' and 'ID'");
-        }
+        if(idxName === -1 || idxID === -1) return alert("CSV Error: Need Name & ID");
 
         let batch = [];
         let successCount = 0;
         const batchSize = 50; 
 
-        alert("Importing... Please do not close.");
+        alert("Importing... Please wait.");
 
-        // 2. Parse Rows
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
-
-            // Handle commas inside quotes (Basic regex split)
-            // If simpler CSV, simple split works:
             const cols = line.split(","); 
-
-            // Extract data using dynamic indexes
             const cName = cols[idxName]?.replace(/"/g, '').trim();
-            const cMobile = idxMobile > -1 ? cols[idxMobile]?.trim() : "";
             const cID = cols[idxID]?.trim();
             const cStamps = idxStamps > -1 ? (parseInt(cols[idxStamps]) || 0) : 0;
             const cLife = idxLife > -1 ? (parseInt(cols[idxLife]) || 0) : 0;
@@ -199,14 +189,13 @@ function importCSV() {
             if (cName && cID) {
                 batch.push({
                     name: cName,
-                    mobile: cMobile,
+                    mobile: cols[1] || "",
                     customer_id: cID,
                     stamps: cStamps,
                     lifetime_stamps: cLife
                 });
             }
 
-            // Send Batch
             if (batch.length >= batchSize || i === lines.length - 1) {
                 if (batch.length > 0) {
                     await sendBatch(batch);
@@ -215,8 +204,7 @@ function importCSV() {
                 }
             }
         }
-        
-        alert(`Success! ${successCount} records imported.`);
+        alert(`Success! ${successCount} imported.`);
         loadCustomers();
         fileInput.value = "";
     };
@@ -226,17 +214,15 @@ function importCSV() {
 async function sendBatch(data) {
     try {
         await fetch(`${API_URL}/customer`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'import', data: data })
         });
     } catch (err) { console.error("Batch error", err); }
 }
 
-// EXPORT CSV
 function exportCSV() { 
     if(customersList.length === 0) return alert("No data");
-    let csv = "Name,Mobile,ID,Stamps,Lifetime\n" + 
+    let csv = "Name,Mobile,ID,Stamps,Lifetime_Stamps\n" + 
     customersList.map(r => `"${r.name}",${r.mobile},${r.customer_id},${r.stamps},${r.lifetime_stamps||0}`).join("\n");
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -246,17 +232,14 @@ function exportCSV() {
 }
 
 // ==========================================
-// 🛡️ ADMIN & CUSTOMER LOGIC
+// ⚔️ CUSTOMER PORTAL
 // ==========================================
-
-// ... (KEEP your existing Login/Register/Stamp Logic exactly as is below) ...
-// Below is the condensed version of the existing logic for completeness
-
 async function customerLogin() {
     const idInput = document.getElementById('cust-login-id');
     if(!idInput) return;
     const id = idInput.value.trim();
     if(!id) return alert("Enter Rune ID");
+
     try {
         const res = await fetch(`${API_URL}/customer?action=login&id=${id}`);
         const data = await res.json();
@@ -288,61 +271,77 @@ function renderCustomerStats(c) {
     const rankData = calculateRank(c.lifetime_stamps || 0);
     document.getElementById('rpg-rank').innerText = rankData.name;
     document.getElementById('rpg-rank').style.color = rankData.color;
+    
+    // Bind View ID Button for Customer
+    const btn = document.getElementById('view-my-id-btn');
+    if(btn) btn.onclick = () => generateIDCard(c.name, c.customer_id, c.lifetime_stamps || 0);
+
     const badgeEl = document.getElementById('rank-badge-display');
     if(badgeEl) badgeEl.innerHTML = getRankSVG(rankData.name);
+
     if(document.getElementById('next-rank-name')) document.getElementById('next-rank-name').innerText = rankData.next;
-    const barEl = document.getElementById('xp-bar');
-    if(barEl) {
-        barEl.style.width = Math.min(rankData.pct, 100) + "%";
-        barEl.style.background = rankData.color;
-    }
+    document.getElementById('xp-bar').style.width = Math.min(rankData.pct, 100) + "%";
+    document.getElementById('xp-bar').style.background = rankData.color;
+
     let html = '<div class="stamp-container">';
     for(let i=0; i<6; i++) html += `<div class="orb ${i < c.stamps ? 'filled' : ''}"></div>`;
     html += '</div>';
     document.getElementById('cust-stamps-display').innerHTML = html;
+    
     const msg = c.stamps >= 6 ? "🎉 REWARD UNLOCKED!" : `Collect ${6 - c.stamps} more.`;
     document.getElementById('cust-status-msg').innerText = msg;
+    document.getElementById('cust-status-msg').style.color = c.stamps >= 6 ? "#0f0" : "#aaa";
 }
 
-// ADMIN AUTH
+// ==========================================
+// 🛡️ ADMIN AUTH & LOGIC
+// ==========================================
 async function adminSignUp() {
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-pass').value;
     const username = document.getElementById('reg-username').value;
     if (!email || !password || !username) return alert("Fill all fields");
-    if (password.length < 6) return alert("Password too short");
+    if (password.length < 6) return alert("Too short");
+
     const { data: existing } = await supabaseClient.from('admin_profiles').select('username').eq('username', username).single();
     if(existing) return alert("Username taken");
+
     const { error } = await supabaseClient.auth.signUp({ email, password });
     if (error) return alert(error.message);
+
     await supabaseClient.from('admin_profiles').insert([{ username, email }]);
-    alert("Success! Login now.");
+    alert("Registered! Login now.");
     showSection('admin-login-sec');
 }
+
 async function adminSignIn() {
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-pass').value;
     if (!username || !password) return alert("Enter credentials");
+
     const { data } = await supabaseClient.from('admin_profiles').select('email').eq('username', username).single();
     if (!data) return alert("Username not found");
+
     const { error } = await supabaseClient.auth.signInWithPassword({ email: data.email, password });
     if (error) alert("Incorrect Password");
 }
+
 async function adminSignOut() { await supabaseClient.auth.signOut(); window.location.reload(); }
+
 async function resetAdminPassword() {
     const email = document.getElementById('forgot-email').value;
     if(!email) return alert("Enter email");
     const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
     if(error) alert(error.message); else alert("Reset link sent!");
 }
+
 async function updateAdminPassword() {
     const newPass = document.getElementById('new-password').value;
     if(newPass.length < 6) return alert("Too short");
     const { error } = await supabaseClient.auth.updateUser({ password: newPass });
-    if (error) alert(error.message); else { alert("Updated! Login now."); adminSignOut(); }
+    if (error) alert(error.message); else { alert("Updated! Login."); adminSignOut(); }
 }
 
-// ADMIN LIST
 let customersList = [];
 async function loadCustomers() {
     const el = document.getElementById('customer-list');
@@ -352,6 +351,7 @@ async function loadCustomers() {
     customersList = await res.json();
     renderAdminList(customersList);
 }
+
 function renderAdminList(data) {
     const el = document.getElementById('customer-list');
     if(!el) return;
@@ -364,6 +364,7 @@ function renderAdminList(data) {
         } else {
             btns = `<div class="stamp-control"><button onclick="updateStamp('${c.customer_id}', 'add')" style="flex:3;">+ Stamp</button><button onclick="updateStamp('${c.customer_id}', 'remove')" class="secondary" style="flex:1;">-</button></div>`;
         }
+
         const div = document.createElement('div');
         div.className = 'cust-item';
         div.innerHTML = `
@@ -380,9 +381,11 @@ function renderAdminList(data) {
         el.appendChild(div);
     });
 }
+
 function getOrbHTML(count) {
     let html = ''; for(let i=0; i<6; i++) html += `<div class="orb ${i < count ? 'filled' : ''}"></div>`; return html;
 }
+
 async function createCustomer() {
     const name = document.getElementById('new-name').value;
     const mobile = document.getElementById('new-mobile').value;
