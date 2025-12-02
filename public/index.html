@@ -40,6 +40,9 @@
                 <div class="next-rank">Next: <span id="next-rank-name">Silver</span></div>
             </div>
 
+            <!-- NEW: View ID Button -->
+            <button id="view-my-id-btn" class="large-btn" style="background:linear-gradient(45deg, #333, #555); border-color:#888;">💳 View My ID Card</button>
+
             <h3 class="quest-title">Current Quest</h3>
             <div id="cust-stamps-display"></div>
             
@@ -51,22 +54,25 @@
         </section>
     </div>
 
+    <!-- ID MODAL -->
+    <div id="id-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Identity Rune</h3>
+            <div class="canvas-wrapper"><canvas id="cardCanvas" width="450" height="270"></canvas></div>
+            <br>
+            <div class="modal-actions">
+                <button onclick="downloadID()" class="large-btn">Save Image</button>
+                <button class="secondary" onclick="closeModal('id-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
-    
     <script>
-        let tapCount = 0;
-        let tapTimer = null;
+        let tapCount = 0, tapTimer = null;
         function secretAdminAccess() {
-            tapCount++;
-            clearTimeout(tapTimer);
-            tapTimer = setTimeout(() => { tapCount = 0; }, 1000); // Reset if too slow
-            
-            if (tapCount === 5) {
-                document.body.style.background = "gold"; // Visual feedback
-                setTimeout(() => {
-                    window.location.href = 'dashboard_secure.html'; // Redirect to Admin
-                }, 300);
-            }
+            tapCount++; clearTimeout(tapTimer); tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
+            if (tapCount === 5) { document.body.style.background = "gold"; setTimeout(() => { window.location.href = 'dashboard_secure.html'; }, 300); }
         }
     </script>
 </body>
