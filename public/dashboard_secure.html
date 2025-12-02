@@ -10,28 +10,28 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
     <button onclick="window.location.href='index.html'" class="home-icon" title="Go to Customer View">🏠</button>
-
     <div class="container glass-panel">
         <header>
             <div class="logo-glow">⚔️</div>
             <h1>WARLORD COMMAND</h1>
         </header>
-
+        
+        <!-- ... (Keep Login/Register Sections as in previous response) ... -->
+        
+        <!-- This is just to ensure the ID Modal is present -->
         <section id="admin-login-sec">
             <div class="input-group">
                 <input type="text" id="login-username" placeholder="Admin Username">
                 <input type="password" id="login-pass" placeholder="Password">
             </div>
             <button onclick="adminSignIn()" class="large-btn">Login</button>
-            
             <div class="auth-actions">
-                <button onclick="showSection('admin-register-sec')" class="secondary small-btn">Register New</button>
+                <button onclick="showSection('admin-register-sec')" class="secondary small-btn">Register</button>
                 <button onclick="showSection('admin-forgot-sec')" class="secondary small-btn">Forgot Pass?</button>
             </div>
         </section>
-
+        
         <section id="admin-register-sec" class="hidden">
             <h3>New Registration</h3>
             <input type="text" id="reg-username" placeholder="Choose Username">
@@ -43,7 +43,6 @@
 
         <section id="admin-forgot-sec" class="hidden">
             <h3>Recover Access</h3>
-            <p style="color:#ccc; font-size:0.9em; margin-bottom:10px;">Enter your email to receive the reset scroll.</p>
             <input type="email" id="forgot-email" placeholder="Email Address">
             <button onclick="resetAdminPassword()" class="large-btn">Send Link</button>
             <button onclick="showSection('admin-login-sec')" class="secondary">Back</button>
@@ -61,23 +60,19 @@
                 <button onclick="showAdminTab('list')" class="tab-btn">List</button>
                 <button onclick="adminSignOut()" class="tab-btn danger">Logout</button>
             </div>
-
             <div id="adm-add-sec">
                 <h3>Summon Customer</h3>
                 <input type="text" id="new-name" placeholder="Customer Name">
                 <input type="number" id="new-mobile" placeholder="Mobile Number">
                 <button onclick="createCustomer()" class="large-btn">Generate ID Card</button>
             </div>
-
             <div id="adm-list-sec" class="hidden">
                 <div class="tools-panel">
                     <button onclick="exportCSV()" class="small-btn">⬇ Export</button>
                     <button onclick="document.getElementById('csv-input').click()" class="small-btn">⬆ Import</button>
                     <input type="file" id="csv-input" accept=".csv" class="hidden" onchange="importCSV()">
                 </div>
-                <div class="search-container">
-                    <input type="text" id="search-input" placeholder="🔍 Search..." onkeyup="searchCustomers()">
-                </div>
+                <div class="search-container"><input type="text" id="search-input" placeholder="🔍 Search..." onkeyup="searchCustomers()"></div>
                 <div id="customer-list">Loading scrolls...</div>
             </div>
         </section>
@@ -94,10 +89,8 @@
             </div>
         </div>
     </div>
-
     <script src="app.js"></script>
     <script>
-        // Check session specifically for this page
         if(typeof supabase !== 'undefined') {
             const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             client.auth.onAuthStateChange((event, session) => {
