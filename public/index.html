@@ -9,12 +9,54 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        let secretTaps = 0;
+        let resetTimer = null;
+
+        function secretAdminAccess() {
+            // 1. Visual Feedback (Shrink logo briefly)
+            const logo = document.getElementById('secret-logo-img');
+            if(logo) {
+                logo.style.transform = "scale(0.9)";
+                setTimeout(() => logo.style.transform = "scale(1)", 100);
+            }
+
+            // 2. Count Taps
+            secretTaps++;
+            console.log("Tap count:", secretTaps); // Check console if it fails
+
+            // 3. Reset count if user stops tapping for 1.5 seconds
+            clearTimeout(resetTimer);
+            resetTimer = setTimeout(() => { 
+                secretTaps = 0; 
+            }, 1500);
+
+            // 4. Trigger Success
+            if (secretTaps >= 5) {
+                // Flash Gold
+                document.body.style.transition = "background 0.2s";
+                document.body.style.background = "#ffd700";
+                
+                // Redirect
+                setTimeout(() => {
+                    window.location.href = 'dashboard_secure.html'; 
+                }, 300);
+                
+                // Stop counting
+                secretTaps = 0;
+            }
+        }
+    </script>
 </head>
 <body>
 
     <div class="glass-panel app-section" id="cust-login-sec">
         <header class="app-header">
-            <img src="assets/logo.png" class="shop-logo secret-trigger" onclick="secretAdminAccess()">
+            <div class="logo-wrapper" onclick="secretAdminAccess()">
+                <img id="secret-logo-img" src="assets/logo.png" class="shop-logo">
+            </div>
+            
             <h1>CUSTOMER GRIMOIRE</h1>
             <p class="subtitle">Check Your Rank</p>
         </header>
@@ -56,28 +98,5 @@
     </div>
 
     <script src="js/app.js"></script>
-
-    <script>
-        let tapCount = 0;
-        let tapTimer = null;
-
-        function secretAdminAccess() {
-            tapCount++;
-            
-            // Reset count if user stops tapping for 1 second
-            if (tapTimer) clearTimeout(tapTimer);
-            tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
-
-            if (tapCount === 5) {
-                // Visual Flash Effect
-                document.body.style.animation = "secretFlash 0.5s";
-                document.body.style.backgroundColor = "gold";
-                
-                setTimeout(() => {
-                    window.location.href = 'dashboard_secure.html'; // Teleport to Admin
-                }, 400);
-            }
-        }
-    </script>
 </body>
 </html>
