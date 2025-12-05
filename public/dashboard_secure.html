@@ -4,52 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Warlord Command</title>
+    <meta name="theme-color" content="#8a0303">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
     <a href="index.html" class="home-icon">🏠</a>
 
-    <div class="glass-panel app-section">
+    <div class="glass-panel">
         <header class="app-header">
             <img src="assets/logo.png" class="shop-logo">
             <h1>WARLORD COMMAND</h1>
         </header>
 
-        <div id="admin-login-sec" class="app-section">
-            <input type="text" id="login-username" placeholder="Username">
-            <input type="password" id="login-pass" placeholder="Password">
+        <section id="admin-login-sec" class="app-section">
+            <div class="input-group">
+                <input type="text" id="login-username" placeholder="Username">
+                <input type="password" id="login-pass" placeholder="Password">
+            </div>
             <button onclick="adminSignIn()" class="primary-btn">Login</button>
+            
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button onclick="showSection('admin-register-sec')" class="secondary-btn" style="flex:1;">Register</button>
                 <button onclick="showSection('admin-forgot-sec')" class="secondary-btn" style="flex:1;">Forgot?</button>
             </div>
-        </div>
+        </section>
 
-        <div id="admin-register-sec" class="app-section hidden">
+        <section id="admin-register-sec" class="app-section hidden">
             <h3>New Admin</h3>
             <input type="text" id="reg-username" placeholder="New Username">
             <input type="email" id="reg-email" placeholder="Your Email">
             <input type="password" id="reg-pass" placeholder="Create Password">
             <button onclick="adminSignUp()" class="primary-btn">Register</button>
             <button onclick="showSection('admin-login-sec')" class="secondary-btn">Back</button>
-        </div>
+        </section>
 
-        <div id="admin-forgot-sec" class="app-section hidden">
+        <section id="admin-forgot-sec" class="app-section hidden">
             <h3>Recovery</h3>
             <input type="email" id="forgot-email" placeholder="Email Address">
             <button onclick="resetAdminPassword()" class="primary-btn">Send Link</button>
             <button onclick="showSection('admin-login-sec')" class="secondary-btn">Back</button>
-        </div>
+        </section>
 
-        <div id="admin-update-pass-sec" class="app-section hidden">
-            <h3>New Password</h3>
+        <section id="admin-update-pass-sec" class="app-section hidden">
+            <h3>Set New Password</h3>
             <input type="password" id="new-password" placeholder="New Password">
             <button onclick="updateAdminPassword()" class="primary-btn">Update</button>
-        </div>
+        </section>
 
-        <div id="admin-dashboard" class="app-section hidden">
+        <section id="admin-dashboard" class="app-section hidden">
             <div style="display:flex; gap:5px; margin-bottom:20px;">
                 <button onclick="showAdminTab('add')" class="secondary-btn" style="flex:1;">Add</button>
                 <button onclick="showAdminTab('list')" class="secondary-btn" style="flex:1;">List</button>
@@ -71,7 +76,7 @@
                 <input type="text" id="search-input" placeholder="🔍 Search..." onkeyup="searchCustomers()">
                 <div id="customer-list"></div>
             </div>
-        </div>
+        </section>
     </div>
 
     <div id="id-modal" class="modal hidden">
@@ -85,18 +90,10 @@
 
     <script src="js/app.js"></script>
     <script>
-        // Auto-run admin check
+        // Check session on load
         document.addEventListener('DOMContentLoaded', () => {
             if(typeof supabase !== 'undefined' && typeof checkAdminSession === 'function') {
-                // Wait a moment for library to init
-                setTimeout(() => { 
-                    supabaseClient.auth.getSession().then(({data}) => {
-                        if(data.session) {
-                            showSection('admin-dashboard');
-                            loadCustomers();
-                        }
-                    });
-                }, 500);
+                checkAdminSession();
             }
         });
     </script>
