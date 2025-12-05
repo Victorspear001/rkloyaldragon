@@ -8,6 +8,22 @@ body {
     text-align: center; margin: 0; padding: 20px 10px;
     background-image: radial-gradient(circle at 50% 0%, #2a0000 0%, #000 70%);
     min-height: 100vh;
+    transition: background-color 0.5s;
+}
+
+/* SECRET TRIGGER (Prevent selection while tapping) */
+.secret-trigger {
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s;
+}
+.secret-trigger:active { transform: scale(0.95); }
+
+@keyframes secretFlash {
+    0% { background-color: var(--bg); }
+    50% { background-color: #ffd700; }
+    100% { background-color: var(--bg); }
 }
 
 /* --- LOGO --- */
@@ -66,11 +82,14 @@ h1, h2 { font-family: 'Cinzel', serif; color: var(--accent); margin: 5px 0; text
 .progress-track { background: #333; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, #ff4500, #ffd700); width: 0%; transition: width 0.5s; }
 
-/* --- BUTTONS & LIST --- */
+/* --- BUTTONS --- */
 input { width: 100%; padding: 12px; background: #111; border: 1px solid #444; color: white; border-radius: 8px; margin: 10px 0; }
 button { width: 100%; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: 0.2s; margin-bottom: 5px; }
 .primary-btn { background: linear-gradient(135deg, #8b0000, #ff4500); color: white; border: 1px solid var(--accent); }
 .secondary-btn { background: #222; color: #ccc; border: 1px solid #444; }
+.danger-btn { background: #330000; color: #ff5555; border: 1px solid #ff0000; }
+
+/* --- LIST --- */
 .cust-item { background: #111; padding: 15px; margin: 10px 0; border-radius: 10px; border-left: 4px solid var(--primary); text-align: left; position: relative; }
 .rank-mini-icon { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; object-fit: contain; }
 
@@ -78,4 +97,4 @@ button { width: 100%; padding: 12px; border-radius: 8px; border: none; cursor: p
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 999; }
 .modal-content { background: #000; padding: 20px; border-radius: 15px; border: 2px solid var(--accent); }
 canvas { width: 100%; max-width: 450px; height: auto; border-radius: 10px; box-shadow: 0 0 25px gold; }
-.home-icon { position: fixed; top: 15px; left: 15px; font-size: 24px; text-decoration: none; z-index: 1000; }
+.home-icon { position: fixed; top: 15px; left: 15px; font-size: 24px; text-decoration: none; z-index: 1000; background:rgba(0,0,0,0.8); border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border:1px solid gold; }
