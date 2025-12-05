@@ -10,13 +10,15 @@ module.exports = async function (req, res) {
     const result = await pool.query('SELECT * FROM customers ORDER BY id DESC');
     return res.status(200).json(result.rows || []);
   }
-  const { action, name, mobile, id, type } = req.body;
+  const { action, name, mobile, id, type, data } = req.body;
   try {
+    // ADD USER: Force redeems to 0
     if (action === 'add') {
       const custId = `RK${Math.floor(1000 + Math.random() * 9000)}`;
       await pool.query('INSERT INTO customers (name, mobile, customer_id, redeems) VALUES ($1, $2, $3, 0)', [name, mobile, custId]);
       return res.status(200).json({ customerId: custId });
     }
+    // STAMP: Handle Redeems logic
     if (action === 'stamp') {
       if (type === 'reset') await pool.query('UPDATE customers SET stamps = 0, redeems = COALESCE(redeems,0) + 1 WHERE customer_id = $1', [id]);
       else if (type === 'add') await pool.query('UPDATE customers SET stamps = COALESCE(stamps,0) + 1 WHERE customer_id = $1', [id]);
@@ -26,6 +28,13 @@ module.exports = async function (req, res) {
     if (action === 'delete') {
       await pool.query('DELETE FROM customers WHERE customer_id = $1', [id]);
       return res.status(200).json({ message: 'Deleted' });
+    }
+    // IMPORT
+    if (action === 'import' && Array.isArray(data)) {
+        for (const c of data) {
+            await pool.query('INSERT INTO customers (name, mobile, customer_id, stamps, redeems) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (customer_id) DO NOTHING', [c.name, c.mobile, c.customer_id, c.stamps, c.redeems || 0]);
+        }
+        return res.status(200).json({ message: 'Batch Imported' });
     }
   } catch (err) { return res.status(500).json({ error: err.message }); }
 };
