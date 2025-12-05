@@ -3,75 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RK Dragon Loyalty</title>
-    <meta name="theme-color" content="#8a0303">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
+    <title>Customer Portal</title>
+    <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-    <div class="container glass-panel">
-        <header>
-            <div class="logo-glow" onclick="secretAdminAccess()" style="cursor:pointer; user-select:none;">🐲</div>
-            <h1>CUSTOMER GRIMOIRE</h1>
-            <p class="subtitle">Check Your Rank</p>
+    <div class="glass-panel app-section" id="cust-login-sec">
+        <header class="app-header">
+            <img src="assets/logo.png" class="shop-logo">
+            <h1>CUSTOMER PORTAL</h1>
         </header>
-
-        <section id="cust-login-sec">
-            <p>Enter your Rune ID</p>
-            <input type="text" id="cust-login-id" placeholder="ID (e.g. RK1234)">
-            <button onclick="customerLogin()" class="large-btn pulse-btn">Check Stats</button>
-        </section>
-
-        <section id="cust-dashboard" class="hidden">
-            <h2 id="display-cust-name" class="glow-text">Warrior</h2>
-            
-            <div class="rpg-card">
-                <div class="badge-container" id="rank-badge-display"></div>
-                <div class="level-header">
-                    <span id="rpg-rank">Bronze</span>
-                    <span class="lvl-text">Lvl: <span id="lifetime-count">0</span></span>
-                </div>
-                <div class="level-progress">
-                    <div class="bar-fill" id="xp-bar"></div>
-                </div>
-                <div class="next-rank">Next: <span id="next-rank-name">Silver</span></div>
-            </div>
-
-            <button id="view-my-id-btn" class="large-btn" style="background: #222; border-color: gold; color: gold; margin-top:10px;">💳 View My ID Card</button>
-
-            <h3 class="quest-title">Current Quest</h3>
-            <div id="cust-stamps-display"></div>
-            
-            <div class="status-card">
-                <p id="cust-status-msg"></p>
-            </div>
-
-            <button onclick="location.reload()" class="secondary small-btn" style="margin-top:20px;">Logout</button>
-        </section>
+        <input type="text" id="cust-login-id" placeholder="Enter Rune ID">
+        <button onclick="customerLogin()" class="primary-btn pulse-btn">Check Stats</button>
+        <div onclick="secretAdminAccess()" style="height:50px; margin-top:50px;"></div>
     </div>
 
+    <div class="glass-panel app-section hidden" id="cust-dashboard">
+        <header class="app-header">
+            <img src="assets/logo.png" class="shop-logo" style="width:80px; height:80px;">
+            <h2 id="display-cust-name">Name</h2>
+        </header>
+        
+        <div class="rpg-card">
+            <img id="rank-shield-img" class="shield-icon" src="assets/shield_bronze.png">
+            <div class="level-info">
+                <div class="level-title" id="display-rank-name">BRONZE</div>
+                <div class="redeem-count">Total Redeems: <span id="display-redeems">0</span></div>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="xp-bar"></div></div>
+        </div>
+
+        <div class="stamp-container" id="cust-stamps-display"></div>
+        <button id="view-my-id-btn" class="secondary-btn">💳 View ID Card</button>
+        <button onclick="location.reload()" class="secondary-btn" style="margin-top:10px;">Exit</button>
+    </div>
+    
     <div id="id-modal" class="modal hidden">
         <div class="modal-content">
-            <h3>Identity Rune</h3>
-            <div class="canvas-wrapper"><canvas id="cardCanvas" width="450" height="270"></canvas></div>
+            <canvas id="cardCanvas" width="450" height="270"></canvas>
             <br>
-            <div class="modal-actions">
-                <button onclick="downloadID()" class="large-btn">Save Image</button>
-                <button class="secondary" onclick="closeModal('id-modal')">Close</button>
-            </div>
+            <button onclick="downloadID()" class="primary-btn">Save Image</button>
+            <button onclick="closeModal('id-modal')" class="secondary-btn">Close</button>
         </div>
     </div>
-
-    <script src="app.js"></script>
+    <script src="js/app.js"></script>
     <script>
-        let tapCount = 0, tapTimer = null;
-        function secretAdminAccess() {
-            tapCount++; clearTimeout(tapTimer); tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
-            if (tapCount === 5) { document.body.style.background = "gold"; setTimeout(() => { window.location.href = 'dashboard_secure.html'; }, 300); }
-        }
+        let taps=0; function secretAdminAccess(){ taps++; if(taps===5) window.location.href='dashboard_secure.html'; setTimeout(()=>taps=0, 1000); }
     </script>
 </body>
 </html>
