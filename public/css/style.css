@@ -11,22 +11,21 @@ body {
     transition: background-color 0.5s;
 }
 
-/* --- SECRET LOGO TRIGGER (FIXED) --- */
+/* --- SECRET LOGO TRIGGER --- */
 .logo-wrapper {
     display: inline-block;
     cursor: pointer;
     user-select: none;
-    -webkit-tap-highlight-color: transparent; /* Remove blue highlight on tap */
-    touch-action: manipulation; /* DISABLES DOUBLE-TAP ZOOM -> Makes click instant */
-    padding: 10px; /* Bigger hit area */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation; /* INSTANT TAP - NO DELAY */
+    padding: 10px;
 }
-
 .shop-logo {
     width: 120px; height: 120px; object-fit: contain;
     filter: drop-shadow(0 0 15px rgba(255, 69, 0, 0.5));
-    transition: transform 0.1s; /* Smooth bounce effect */
+    transition: transform 0.1s;
 }
-
+/* ... (Keep the rest of your style.css) ... */
 /* --- GLASS PANEL --- */
 .glass-panel {
     background: var(--panel); border: 1px solid var(--border); border-radius: 20px;
