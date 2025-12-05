@@ -3,51 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RK Dragon Loyalty</title>
-    <meta name="theme-color" content="#8a0303">
-    <link rel="manifest" href="manifest.json">
+    <title>Customer Portal</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script>
-        let secretTaps = 0;
-        let resetTimer = null;
-
-        function secretAdminAccess() {
-            // 1. Visual Feedback (Shrink logo briefly)
-            const logo = document.getElementById('secret-logo-img');
-            if(logo) {
-                logo.style.transform = "scale(0.9)";
-                setTimeout(() => logo.style.transform = "scale(1)", 100);
-            }
-
-            // 2. Count Taps
-            secretTaps++;
-            console.log("Tap count:", secretTaps); // Check console if it fails
-
-            // 3. Reset count if user stops tapping for 1.5 seconds
-            clearTimeout(resetTimer);
-            resetTimer = setTimeout(() => { 
-                secretTaps = 0; 
-            }, 1500);
-
-            // 4. Trigger Success
-            if (secretTaps >= 5) {
-                // Flash Gold
-                document.body.style.transition = "background 0.2s";
-                document.body.style.background = "#ffd700";
-                
-                // Redirect
-                setTimeout(() => {
-                    window.location.href = 'dashboard_secure.html'; 
-                }, 300);
-                
-                // Stop counting
-                secretTaps = 0;
-            }
-        }
-    </script>
 </head>
 <body>
 
@@ -56,11 +15,8 @@
             <div class="logo-wrapper" onclick="secretAdminAccess()">
                 <img id="secret-logo-img" src="assets/logo.png" class="shop-logo">
             </div>
-            
-            <h1>CUSTOMER GRIMOIRE</h1>
-            <p class="subtitle">Check Your Rank</p>
+            <h1>CUSTOMER PORTAL</h1>
         </header>
-
         <div class="input-group">
             <input type="text" id="cust-login-id" placeholder="Enter Rune ID (e.g. RK1234)">
             <button onclick="customerLogin()" class="primary-btn pulse-btn">Check Stats</button>
@@ -70,20 +26,26 @@
     <div class="glass-panel app-section hidden" id="cust-dashboard">
         <header class="app-header">
             <img src="assets/logo.png" class="shop-logo" style="width:80px; height:80px;">
-            <h2 id="display-cust-name">Warrior</h2>
+            <h2 id="display-cust-name">Name</h2>
         </header>
         
         <div class="rpg-card">
-            <img id="rank-shield-img" class="shield-icon" src="assets/shield_bronze.png">
+            <img id="rank-shield-img" class="shield-icon" src="assets/shield_bronze.png" onerror="this.src='assets/logo.png'">
+            
             <div class="level-info">
                 <div class="level-title" id="display-rank-name">BRONZE</div>
-                <div class="redeem-count">Redeems: <span id="display-redeems">0</span></div>
+                <div class="redeem-count">Total Redeems: <span id="display-redeems">0</span></div>
             </div>
             <div class="progress-track"><div class="progress-fill" id="xp-bar"></div></div>
         </div>
 
+        <h3 style="margin-top:20px; color:gold;">Current Quest</h3>
         <div class="stamp-container" id="cust-stamps-display"></div>
         
+        <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; margin:10px 0;">
+            <p id="cust-status-msg" style="margin:0;"></p>
+        </div>
+
         <button id="view-my-id-btn" class="secondary-btn">💳 View ID Card</button>
         <button onclick="location.reload()" class="secondary-btn" style="margin-top:10px;">Exit</button>
     </div>
@@ -98,5 +60,8 @@
     </div>
 
     <script src="js/app.js"></script>
+    <script>
+        let taps=0; function secretAdminAccess(){ taps++; if(taps===5) window.location.href='dashboard_secure.html'; setTimeout(()=>taps=0, 1000); }
+    </script>
 </body>
 </html>
