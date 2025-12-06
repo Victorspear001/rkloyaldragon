@@ -2,17 +2,15 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # Runs at 00:00 and 12:00 UTC every day (Twice a day)
-    - cron: '0 */12 * * *'
-  workflow_dispatch: # Allows you to run this manually if needed
+    # Run at 6:00 AM and 6:00 PM UTC every day
+    - cron: '0 6,18 * * *'
+  workflow_dispatch:
 
 jobs:
-  ping_database:
+  ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Wake up the Database
+      - name: Ping Vercel API
         run: |
-          echo "Pinging Vercel API to trigger Supabase connection..."
-          # This connects to your API, which connects to the DB
-          curl -s https://rkloyaldragon.vercel.app//api/customer > /dev/null
-          echo "Ping complete. Database timer reset."
+          # Replace with your ACTUAL Vercel URL
+          curl -s https://rkloyaldragon.vercel.app/api/customer > /dev/null
