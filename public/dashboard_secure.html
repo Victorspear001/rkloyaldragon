@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Warlord Command</title>
-    <meta name="theme-color" content="#8a0303">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -18,31 +17,35 @@
         </header>
         
         <section id="admin-login-sec" class="app-section">
-            <div class="input-group">
-                <input type="text" id="login-username" placeholder="Username">
-                <input type="password" id="login-pass" placeholder="Password">
-            </div>
+            <input type="text" id="login-username" placeholder="Username">
+            <input type="password" id="login-pass" placeholder="Password">
             <button onclick="adminSignIn()" class="primary-btn">Login</button>
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button onclick="showSection('admin-register-sec')" class="secondary-btn" style="flex:1;">Register</button>
                 <button onclick="showSection('admin-forgot-sec')" class="secondary-btn" style="flex:1;">Forgot?</button>
             </div>
         </section>
-
+        
         <section id="admin-register-sec" class="app-section hidden">
             <h3>New Admin</h3>
-            <input type="text" id="reg-username" placeholder="Username">
-            <input type="email" id="reg-email" placeholder="Email">
-            <input type="password" id="reg-pass" placeholder="Password">
+            <input type="text" id="reg-username" placeholder="New Username">
+            <input type="email" id="reg-email" placeholder="Your Email">
+            <input type="password" id="reg-pass" placeholder="Create Password">
             <button onclick="adminSignUp()" class="primary-btn">Register</button>
             <button onclick="showSection('admin-login-sec')" class="secondary-btn">Back</button>
         </section>
 
         <section id="admin-forgot-sec" class="app-section hidden">
             <h3>Recovery</h3>
-            <input type="email" id="forgot-email" placeholder="Email">
+            <input type="email" id="forgot-email" placeholder="Email Address">
             <button onclick="resetAdminPassword()" class="primary-btn">Send Link</button>
             <button onclick="showSection('admin-login-sec')" class="secondary-btn">Back</button>
+        </section>
+
+        <section id="admin-update-pass-sec" class="app-section hidden">
+            <h3>Set New Password</h3>
+            <input type="password" id="new-password" placeholder="New Password">
+            <button onclick="updateAdminPassword()" class="primary-btn">Update</button>
         </section>
 
         <section id="admin-dashboard" class="app-section hidden">
@@ -51,13 +54,11 @@
                 <button onclick="showAdminTab('list')" class="secondary-btn" style="flex:1;">List</button>
                 <button onclick="adminSignOut()" class="danger-btn" style="flex:1;">Logout</button>
             </div>
-
             <div id="adm-add-sec">
                 <input type="text" id="new-name" placeholder="Name">
                 <input type="number" id="new-mobile" placeholder="Mobile">
                 <button onclick="createCustomer()" class="primary-btn">Generate ID</button>
             </div>
-
             <div id="adm-list-sec" class="hidden">
                 <div style="display:flex; gap:5px; margin-bottom:10px;">
                     <button onclick="exportCSV()" class="secondary-btn" style="font-size:0.8em;">⬇ CSV</button>
