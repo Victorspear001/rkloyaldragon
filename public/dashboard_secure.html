@@ -2,15 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Warlord Command</title>
+    <meta name="theme-color" content="#8a0303">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="/assets/logo.png">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
-<body id="admin-portal"> <a href="index.html" class="home-icon">🏠</a>
+<body>
+
+    <a href="index.html" class="home-icon">🏠</a>
 
     <div class="glass-panel">
         <header class="app-header">
@@ -18,60 +24,70 @@
             <h1>WARLORD COMMAND</h1>
         </header>
 
-        <div id="admin-login-sec" class="app-section">
-            <input type="text" id="login-username" placeholder="Username">
-            <input type="password" id="login-pass" placeholder="Password">
+        <section id="admin-login-sec" class="app-section">
+            <div class="input-group">
+                <input type="text" id="login-username" placeholder="Username">
+                <input type="password" id="login-pass" placeholder="Password">
+            </div>
             <button onclick="adminSignIn()" class="primary-btn">Login</button>
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button onclick="showSection('admin-register-sec')" class="secondary-btn" style="flex:1;">Register</button>
                 <button onclick="showSection('admin-forgot-sec')" class="secondary-btn" style="flex:1;">Forgot?</button>
             </div>
-        </div>
+        </section>
 
-        <div id="admin-dashboard" class="app-section hidden">
-            <div style="display:flex; gap:5px; margin-bottom:20px;">
-                <button onclick="showAdminTab('add')" class="secondary-btn" style="flex:1;">Add</button>
-                <button onclick="showAdminTab('list')" class="secondary-btn" style="flex:1;">List</button>
-                <a href="admin_history.html" class="secondary-btn" style="flex:1; text-align:center; padding-top:14px; text-decoration:none;">History</a>
-                <button onclick="adminSignOut()" class="danger-btn" style="flex:1;">Logout</button>
-            </div>
-
-            <div id="adm-add-sec">
-                <input type="text" id="new-name" placeholder="Name">
-                <input type="number" id="new-mobile" placeholder="Mobile">
-                <button onclick="createCustomer()" class="primary-btn">Generate ID</button>
-            </div>
-
-            <div id="adm-list-sec" class="hidden">
-                <div style="display:flex; gap:5px; margin-bottom:10px;">
-                    <button onclick="exportCSV()" class="secondary-btn" style="font-size:0.8em;">⬇ CSV</button>
-                    <button onclick="document.getElementById('csv-input').click()" class="secondary-btn" style="font-size:0.8em;">⬆ Import</button>
-                    <input type="file" id="csv-input" accept=".csv" class="hidden" onchange="importCSV()">
-                </div>
-                <input type="text" id="search-input" placeholder="🔍 Search Name/Mobile/ID..." onkeyup="searchCustomers()">
-                <div id="customer-list">Loading...</div>
-            </div>
-        </div>
-
-        <div id="admin-register-sec" class="app-section hidden">
-            <h3>Register</h3>
+        <section id="admin-register-sec" class="app-section hidden">
+            <h3>New Admin</h3>
             <input type="text" id="reg-username" placeholder="New Username">
             <input type="email" id="reg-email" placeholder="Your Email">
             <input type="password" id="reg-pass" placeholder="Create Password">
             <button onclick="adminSignUp()" class="primary-btn">Register</button>
             <button onclick="showSection('admin-login-sec')" class="secondary-btn">Back</button>
-        </div>
-        <div id="admin-forgot-sec" class="app-section hidden">
+        </section>
+
+        <section id="admin-forgot-sec" class="app-section hidden">
             <h3>Recovery</h3>
             <input type="email" id="forgot-email" placeholder="Email Address">
             <button onclick="resetAdminPassword()" class="primary-btn">Send Link</button>
             <button onclick="showSection('admin-login-sec')" class="secondary-btn">Back</button>
-        </div>
-        <div id="admin-update-pass-sec" class="app-section hidden">
-            <h3>New Password</h3>
+        </section>
+
+        <section id="admin-update-pass-sec" class="app-section hidden">
+            <h3>Set New Password</h3>
             <input type="password" id="new-password" placeholder="New Password">
             <button onclick="updateAdminPassword()" class="primary-btn">Update</button>
-        </div>
+        </section>
+
+        <section id="admin-dashboard" class="app-section hidden">
+            <div style="display:flex; gap:5px; margin-bottom:20px;">
+                <button onclick="showAdminTab('add')" class="secondary-btn" style="flex:1;">Add</button>
+                <button onclick="showAdminTab('list')" class="secondary-btn" style="flex:1;">List</button>
+                <a href="admin_history.html" class="secondary-btn" style="flex:1; text-align:center; text-decoration:none; padding-top:14px; color:#ccc;">History</a>
+                <button onclick="adminSignOut()" class="danger-btn" style="flex:1;">Logout</button>
+            </div>
+
+            <div id="adm-add-sec">
+                <h3>Summon Customer</h3>
+                <input type="text" id="new-name" placeholder="Customer Name">
+                <input type="number" id="new-mobile" placeholder="Mobile Number">
+                <button onclick="createCustomer()" class="primary-btn">Generate ID Card</button>
+            </div>
+
+            <div id="adm-list-sec" class="hidden">
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <button onclick="exportCSV()" class="secondary-btn" style="font-size:0.8em;">⬇ Export CSV</button>
+                    <button onclick="document.getElementById('csv-input').click()" class="secondary-btn" style="font-size:0.8em;">⬆ Import CSV</button>
+                    <input type="file" id="csv-input" accept=".csv" class="hidden" onchange="importCSV()">
+                </div>
+                
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" placeholder="🔍 Search Name, ID, or Mobile..." onkeyup="searchCustomers()">
+                    <button onclick="startAdminScanner()" class="scan-btn">📷</button>
+                </div>
+                
+                <div id="customer-list">Loading scrolls...</div>
+            </div>
+        </section>
     </div>
 
     <div id="id-modal" class="modal hidden">
@@ -86,6 +102,28 @@
         </div>
     </div>
 
+    <div id="scanner-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 style="color:gold;">SCAN ID</h3>
+            <div id="reader" style="width: 100%; border: 2px solid gold;"></div>
+            <br>
+            <button onclick="stopScanner()" class="secondary-btn">Close Scanner</button>
+        </div>
+    </div>
+
     <script src="js/app.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait slightly for Supabase to initialize
+            setTimeout(() => {
+                if(typeof supabase !== 'undefined' && typeof checkAdminSession === 'function') {
+                    // This function in app.js handles the logic to show the dashboard if logged in
+                    // It uses the auth listener we set up there.
+                    checkAdminSession();
+                }
+            }, 100);
+        });
+    </script>
 </body>
 </html>
